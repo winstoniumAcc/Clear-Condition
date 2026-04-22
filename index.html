@@ -588,24 +588,19 @@ function startPolling(name) {
   }, 2000);
 }
 
-function flipCamera() {
+async function flipCamera() {
   currentFacingMode = (currentFacingMode === "environment") ? "user" : "environment";
 
-  alert("Camera flipped: " + currentFacingMode);
-
+  // 🔴 if recording is active, restart smoothly
   if (mediaRecorder && mediaRecorder.state === "recording") {
     stopRecording();
-    resetCameraPreview();
+
+    setTimeout(async () => {
+      await startRecording();
+    }, 300);
+
+    return;
   }
-}
-
-function resetCameraPreview() {
-  recordedChunks = [];
-  videoBlob = null;
-
-  const video = document.getElementById("preview");
-  video.src = "";
-  video.controls = false;
 }
 </script>
 
