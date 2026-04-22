@@ -422,6 +422,7 @@ let recordedChunks = [];
 let videoBlob;
 let cameraStream = null;
 let isRecording = false;
+let isProcessing = false;
 
 async function initCamera() {
   if (cameraStream) {
@@ -440,7 +441,7 @@ async function initCamera() {
 
 async function startRecording() {
 
-  if (isRecording) return; // ❌ prevents spam
+  if (isRecording || isProcessing) return; // ❌ prevents spam
 
   await initCamera();
 
@@ -468,6 +469,7 @@ async function startRecording() {
     showPreview();
 
     isRecording = false;
+    isProcessing = false;
   };
 
   mediaRecorder.start();
@@ -497,7 +499,9 @@ function resetCamera() {
 
 function stopRecording() {
   if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    mediaRecorder.stop();
+
+    isProcessing = true;
+    mediaRecorder.stop(); 
   }
 }
 
