@@ -206,7 +206,6 @@
   <div class="card-ui text-center">
 
     <h4>📷 Scan QR Code</h4>
-    <button class="btn btn-outline-light w-100 mb-2" onclick="flipCameraMode()">🔄 Flip Camera</button>
     <div id="reader" style="width:100%"></div>
 
     <button class="btn btn-outline-light w-100 mt-3" onclick="stopScanner(); show('success1');">
@@ -421,12 +420,17 @@ function stopScanner() {
 let mediaRecorder;
 let recordedChunks = [];
 let videoBlob;
+let cameraStream = null;
 
 async function startRecording() {
- const stream = await navigator.mediaDevices.getUserMedia({
-  video: { facingMode: currentFacingMode },
-  audio: true
-});
+ if (!cameraStream) {
+  cameraStream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: currentFacingMode },
+    audio: true
+  });
+}
+
+const stream = cameraStream;
 
   const video = document.getElementById("preview");
 
@@ -445,9 +449,6 @@ async function startRecording() {
 
   mediaRecorder.onstop = () => {
     videoBlob = new Blob(recordedChunks, { type: "video/webm" });
-
-    // stop camera
-    stream.getTracks().forEach(track => track.stop());
 
     document.getElementById("recordDot").style.display = "none";
 
@@ -573,17 +574,19 @@ function flipCamera() {
 
   alert("Camera flipped: " + currentFacingMode);
 
-  // restart recording preview if camera is open
-   if (html5QrCode) {
-    html5QrCode.stop().then(() => {
-      html5QrCode.clear();
-      startScanner();
-    });
-  }
   if (mediaRecorder && mediaRecorder.state === "recording") {
     stopRecording();
-    setTimeout(startRecording, 500);
+    resetCameraPreview();
   }
+}
+
+function resetCameraPreview() {
+  recordedChunks = [];
+  videoBlob = null;
+
+  const video = document.getElementById("preview");
+  video.src = "";
+  video.controls = false;
 }
 </script>
 
