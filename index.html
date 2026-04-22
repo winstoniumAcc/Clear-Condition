@@ -424,8 +424,10 @@ let cameraStream = null;
 let isRecording = false;
 
 async function initCamera() {
-  if (cameraStream) return; // already exists
-
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
   cameraStream = await navigator.mediaDevices.getUserMedia({
     video: { facingMode: currentFacingMode },
     audio: true
