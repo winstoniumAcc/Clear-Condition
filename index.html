@@ -192,6 +192,7 @@
 </div>
 
     <button class="btn btn-danger w-100 mt-2" onclick="startRecording()">Record / Retake</button>
+    <button class="btn btn-outline-light w-100 mt-2" onclick="flipCamera()">Flip Camera</button>
     <button class="btn btn-secondary w-100 mt-2" onclick="stopRecording()">Stop</button>
     <button class="btn btn-success w-100 mt-2" onclick="uploadVideo()">Upload</button>
 
@@ -217,6 +218,7 @@
 <script>
 let currentClue = 1;
 let html5QrCode;
+let currentFacingMode = "environment";
 
 const names = [
   "Alvaro","Ben","Bryan","Cathleen","Cheryl",
@@ -420,10 +422,10 @@ let recordedChunks = [];
 let videoBlob;
 
 async function startRecording() {
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "environment" },
-    audio: true
-  });
+ const stream = await navigator.mediaDevices.getUserMedia({
+  video: { facingMode: currentFacingMode },
+  audio: true
+});
 
   const video = document.getElementById("preview");
 
@@ -563,6 +565,18 @@ function startPolling(name) {
       console.error(err);
     }
   }, 2000);
+}
+
+function flipCamera() {
+  currentFacingMode = (currentFacingMode === "environment") ? "user" : "environment";
+
+  alert("Camera flipped: " + currentFacingMode);
+
+  // restart recording preview if camera is open
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    stopRecording();
+    setTimeout(startRecording, 500);
+  }
 }
 </script>
 
