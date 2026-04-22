@@ -421,27 +421,38 @@ let mediaRecorder;
 let recordedChunks = [];
 let videoBlob;
 let cameraStream = null;
+let isRecording = false;
 
-async function startRecording() {
- if (!cameraStream) {
+async function initCamera() {
+  if (cameraStream) return; // already exists
+
   cameraStream = await navigator.mediaDevices.getUserMedia({
     video: { facingMode: currentFacingMode },
     audio: true
   });
-}
-
-const stream = cameraStream;
 
   const video = document.getElementById("preview");
-
-  // 🔥 FIX ECHO: mute preview playback
+  video.srcObject = cameraStream;
   video.muted = true;
-  video.srcObject = stream;
+}
+
+async function startRecording() {
+
+  if (isRecording) return; // ❌ prevents spam
+
+  await initCamera();
+
+  isRecording = true;
+
+  const video = document.getElementById("preview");
+  video.srcObject = cameraStream;
+  video.muted = true;
+  video.controls = false;
 
   document.getElementById("recordDot").style.display = "block";
 
   recordedChunks = [];
-  mediaRecorder = new MediaRecorder(stream);
+  mediaRecorder = new MediaRecorder(cameraStream);
 
   mediaRecorder.ondataavailable = e => {
     if (e.data.size > 0) recordedChunks.push(e.data);
@@ -452,8 +463,9 @@ const stream = cameraStream;
 
     document.getElementById("recordDot").style.display = "none";
 
-    // 🎥 SHOW PREVIEW AFTER RECORDING
     showPreview();
+
+    isRecording = false;
   };
 
   mediaRecorder.start();
@@ -484,6 +496,13 @@ function resetCamera() {
 function stopRecording() {
   if (mediaRecorder && mediaRecorder.state !== "inactive") {
     mediaRecorder.stop();
+  }
+}
+
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
   }
 }
 
