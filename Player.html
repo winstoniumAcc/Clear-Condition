@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Treasure Hunt</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    body {
+      background: radial-gradient(circle at top, #1e1e2f, #0b0b10);
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .screen {
+      display: none;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .active {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card-ui {
+      max-width: 420px;
+      width: 100%;
+      background: #151522;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .btn-game {
+      border-radius: 12px;
+    }
+
+    /* ❌ shake animation */
+    .shake {
+      animation: shake 0.4s;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-6px); }
+      100% { transform: translateX(0); }
+    }
+
+    .zoomFade {
+  animation: zoomFade 0.4s ease;
+    }
+
+    @keyframes zoomFade {
+        0% {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.05);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    @keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.2; }
+  100% { opacity: 1; }
+}
+  </style>
+</head>
+
+<body>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="card-ui text-center">
+    <h2>🧭 Clear Condition</h2>
+    <input id="yourName" class="form-control mb-3" placeholder="Your name">
+    <button class="btn btn-primary w-100 btn-game" onclick="startGame()">Start Game</button>
+  </div>
+</div>
+
+<!-- SPIN WHEEL -->
+<div id="wheelScreen" class="screen">
+  <div class="card-ui text-center">
+    <h3>🎡 Spin Your Team</h3>
+
+    <!-- WHEEL + POINTER WRAPPER -->
+    <div class="position-relative d-flex justify-content-center align-items-center my-3">
+
+      <!-- POINTER (RIGHT SIDE, POINTING LEFT) -->
+      <div style="
+        position: absolute;
+        right: -10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 30px;
+        z-index: 10;
+        color: white;
+      ">
+        ◀
+      </div>
+
+      <!-- WHEEL -->
+      <canvas id="wheel" width="300" height="300"></canvas>
+
+    </div>
+
+    <button id="spinBtn" class="btn btn-warning w-100 mt-3 btn-game" onclick="spinWheel()">
+      Spin
+    </button>
+
+  </div>
+</div>
+
+<!-- PENDING -->
+<div id="pendingScreen" class="screen">
+  <div class="card-ui text-center">
+    <h4>📤 Uploading Task...</h4>
+    <div class="spinner-border text-light my-3"></div>
+    <h5 id="loadingText">Waiting for approval</h5>
+    <p class="text-muted">Please wait...</p>
+  </div>
+</div>
+
+<!-- CLUE 1 -->
+<div id="clue1" class="screen">
+  <div class="card-ui text-center">
+
+    <h4>🧩 Clue 1</h4>
+    <p>I have keys but no locks. What am I?</p>
+
+    <input id="answer" class="form-control mb-3" placeholder="Answer">
+
+    <button class="btn btn-success w-100 btn-game" onclick="checkAnswer()">
+      Submit
+    </button>
+  </div>
+</div>
+
+<!-- SUCCESS 1 -->
+<div id="success1" class="screen">
+  <div class="card-ui text-center">
+    <h2>🎉 Correct!</h2>
+    <p>Scan the QR Code to unlock the next clue 📚</p>
+
+    <button class="btn btn-info w-100 mt-2" onclick="startScanner()">
+      📷 Scan QR Code
+    </button>
+  </div>
+</div>
+
+<!-- TASK (REPLACES CLUE 2) -->
+<div id="clue2" class="screen">
+  <div class="card-ui text-center">
+
+    <h4>🏃 Task 2</h4>
+    <p>Record yourself running around the sports field once</p>
+
+    <!-- FULLSCREEN CAMERA PREVIEW -->
+<div id="cameraBox" style="position: relative; width: 100%; border-radius: 12px; overflow: hidden; background: black;">
+  
+  <video id="preview" autoplay playsinline style="
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+  "></video>
+
+  <!-- RECORDING DOT -->
+  <div id="recordDot" style="
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 12px;
+    height: 12px;
+    background: red;
+    border-radius: 50%;
+    display: none;
+    animation: blink 1s infinite;
+  "></div>
+
+</div>
+
+    <button class="btn btn-danger w-100 mt-2" onclick="startRecording()">Record / Retake</button>
+    <button class="btn btn-secondary w-100 mt-2" onclick="stopRecording()">Stop</button>
+    <button class="btn btn-success w-100 mt-2" onclick="uploadVideo()">Upload</button>
+
+    <p id="statusText" class="mt-2"></p>
+
+  </div>
+</div>
+
+<!-- SCANNER -->
+<div id="scanner" class="screen">
+  <div class="card-ui text-center">
+
+    <h4>📷 Scan QR Code</h4>
+    <div id="reader" style="width:100%"></div>
+
+    <button class="btn btn-outline-light w-100 mt-3" onclick="stopScanner(); show('success1');">
+      Back
+    </button>
+
+  </div>
+</div>
+
+<script>
+let currentClue = 1;
+let html5QrCode;
+
+const names = [
+  "Alvaro","Ben","Bryan","Cathleen","Cheryl",
+  "Christian","Cliff","Felix","Frederick","Gizelle",
+  "Grace","Gwillbert","Jasmine","Jeniffer","Jessica",
+  "Kathleen","Keiko","Sin","Viona","Priscilla",
+  "Victor","Wendellyne","Winston"
+];
+
+let assignedGroup = null;
+let spinning = false;
+
+function playTransition(callback) {
+  let activeScreen = document.querySelector(".screen.active .card-ui");
+
+  if (activeScreen) {
+    activeScreen.classList.remove("zoomFade");
+    void activeScreen.offsetWidth;
+    activeScreen.classList.add("zoomFade");
+  }
+
+  setTimeout(callback, 300);
+}
+
+// ---------------- SCREEN ----------------
+function show(screen) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(screen).classList.add("active");
+
+  // 🔥 SAVE SCREEN STATE
+  // localStorage.setItem("currentScreen", screen);
+}
+
+// ---------------- START GAME ----------------
+function startGame() {
+  let name = document.getElementById("yourName").value.trim();
+
+  let index = names.indexOf(name);
+
+  if (index === -1) {
+    alert("Name not in list!");
+    return;
+  }
+
+  localStorage.setItem("yourName", name);
+
+  // determine group (rigged)
+  if (index <= 4) assignedGroup = 1;
+  else if (index <= 9) assignedGroup = 2;
+  else if (index <= 14) assignedGroup = 3;
+  else assignedGroup = 4;
+
+  show("wheelScreen");
+  drawWheel();
+}
+
+// ---------------- CLUE 1 ----------------
+function checkAnswer() {
+  let input = document.getElementById("answer");
+  let ans = input.value.toLowerCase().trim();
+
+  if (ans === "piano") {
+    show("success1");
+  } else {
+    shake(input);
+  }
+}
+
+function drawWheel() {
+  const canvas = document.getElementById("wheel");
+  const ctx = canvas.getContext("2d");
+
+  const size = 300;
+
+  // 🔥 Fix blur: match canvas resolution to device pixel ratio
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + "px";
+  canvas.style.height = size + "px";
+
+  ctx.scale(dpr, dpr);
+
+  const labels = ["GROUP 1", "GROUP 2", "GROUP 3", "GROUP 4"];
+  const colors = ["#ff4d4d","#4da6ff","#4dff88","#ffd24d"];
+
+  let startAngle = 0;
+  const arc = (2 * Math.PI) / 4;
+
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath();
+    ctx.fillStyle = colors[i];
+    ctx.moveTo(size/2, size/2);
+    ctx.arc(size/2, size/2, size/2, startAngle, startAngle + arc);
+    ctx.fill();
+
+    ctx.save();
+    ctx.fillStyle = "black";
+    ctx.translate(size/2, size/2);
+    ctx.rotate(startAngle + arc / 2);
+    ctx.textAlign = "right";
+    ctx.font = "bold 16px Arial"; // 🔥 sharper text
+    ctx.fillText(labels[i], size/2 - 10, 5);
+    ctx.restore();
+
+    startAngle += arc;
+  }
+}
+
+function spinWheel() {
+  if (spinning) return;
+  spinning = true;
+
+  const canvas = document.getElementById("wheel");
+
+  const segmentAngle = 360 / 4;
+
+  // group index (1-4 → convert to 0-3)
+  const targetIndex = assignedGroup - 1;
+
+  // pointer is at RIGHT → 0 degrees
+  // we want center of segment to land at 0°
+  const offsetToCenter = segmentAngle / 2;
+
+  // base rotation so correct segment lands on pointer
+  const baseRotation = targetIndex * segmentAngle + offsetToCenter;
+
+  // add extra spins for animation
+  const extraSpins = 360 * 5;
+
+  const finalRotation = extraSpins + (360 - baseRotation);
+
+  canvas.style.transition = "transform 4s ease-out";
+  canvas.style.transform = `rotate(${finalRotation}deg)`;
+
+  setTimeout(() => {
+    spinning = false;
+    alert("You got Group " + assignedGroup + " 🎉");
+    show("clue1");
+  }, 4200);
+}
+
+// ---------------- SHAKE ----------------
+function shake(el) {
+  el.classList.remove("shake");
+  void el.offsetWidth;
+  el.classList.add("shake");
+}
+
+// ---------------- QR SCANNER ----------------
+function startScanner() {
+  show("scanner");
+
+  html5QrCode = new Html5Qrcode("reader");
+
+  Html5Qrcode.getCameras().then(devices => {
+
+    let cameraId = devices[0].id;
+
+    html5QrCode.start(
+      cameraId,
+      { fps: 10, qrbox: 250 },
+      onScanSuccess
+    );
+
+  }).catch(err => {
+    alert("Camera error: " + err);
+  });
+}
+
+// ---------------- QR RESULT ----------------
+function onScanSuccess(decodedText) {
+
+ html5QrCode.stop().then(() => html5QrCode.clear());
+
+  let expectedQR = "CLUE" + (currentClue + 1);
+
+  if (decodedText === expectedQR) {
+
+    currentClue++;
+
+    playTransition(() => {
+      show("clue" + currentClue);
+    });
+  } else {
+    alert("Wrong QR Code!");
+    show("success" + currentClue);
+  }
+}
+
+// ---------------- STOP SCANNER ----------------
+function stopScanner() {
+  if (html5QrCode) {
+    html5QrCode.stop().then(() => html5QrCode.clear());
+  }
+}
+
+let mediaRecorder;
+let recordedChunks = [];
+let videoBlob;
+
+async function startRecording() {
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" },
+    audio: true
+  });
+
+  const video = document.getElementById("preview");
+
+  // 🔥 FIX ECHO: mute preview playback
+  video.muted = true;
+  video.srcObject = stream;
+
+  document.getElementById("recordDot").style.display = "block";
+
+  recordedChunks = [];
+  mediaRecorder = new MediaRecorder(stream);
+
+  mediaRecorder.ondataavailable = e => {
+    if (e.data.size > 0) recordedChunks.push(e.data);
+  };
+
+  mediaRecorder.onstop = () => {
+    videoBlob = new Blob(recordedChunks, { type: "video/webm" });
+
+    // stop camera
+    stream.getTracks().forEach(track => track.stop());
+
+    document.getElementById("recordDot").style.display = "none";
+
+    // 🎥 SHOW PREVIEW AFTER RECORDING
+    showPreview();
+  };
+
+  mediaRecorder.start();
+}
+
+function showPreview() {
+  const video = document.getElementById("preview");
+
+  const url = URL.createObjectURL(videoBlob);
+
+  video.srcObject = null;
+  video.src = url;
+  video.controls = true;
+  video.muted = false; // allow playback sound
+
+  video.play();
+}
+
+function resetCamera() {
+  videoBlob = null;
+  recordedChunks = [];
+
+  const video = document.getElementById("preview");
+  video.src = "";
+  video.controls = false;
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    mediaRecorder.stop();
+  }
+}
+
+let currentSubmissionId = null;
+
+async function uploadVideo() {
+  if (!videoBlob) {
+    alert("Record video first!");
+    return;
+  }
+
+  const name = localStorage.getItem("yourName");
+
+  const formData = new FormData();
+  formData.append("video", videoBlob, "recording.webm");
+  formData.append("name", name);
+  formData.append("task", "clue2");
+
+  try {
+    document.getElementById("statusText").innerText = "Uploading...";
+
+    await fetch("http://localhost:3000/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    document.getElementById("statusText").innerText = "Uploaded! Waiting approval...";
+
+    // go to waiting screen
+    show("pendingScreen");
+
+    startPolling(name);
+
+  } catch (err) {
+    console.error(err);
+    alert("Upload failed");
+  }
+}
+
+let pollInterval;
+
+function startPolling(name) {
+  pollInterval = setInterval(async () => {
+    try {
+      const res = await fetch("http://localhost:3000/submissions");
+      const data = await res.json();
+
+      // get latest submission for this user + task
+      const userSubs = data
+        .filter(s => s.name === name && s.task === "clue2")
+        .sort((a, b) => b.attempt - a.attempt);
+
+      if (userSubs.length === 0) return;
+
+      const latest = userSubs[0];
+
+      if (latest.status === "approved") {
+        clearInterval(pollInterval);
+
+        document.getElementById("loadingText").innerText = "✅ Approved!";
+
+        setTimeout(() => {
+          alert("Task approved! 🎉");
+          // 👉 move to next clue if you have
+          // show("clue3");
+        }, 1000);
+      }
+
+      if (latest.status === "rejected") {
+        clearInterval(pollInterval);
+
+        document.getElementById("loadingText").innerText = "❌ Rejected";
+
+        setTimeout(() => {
+          alert("Task rejected. Try again.");
+          show("clue2");
+        }, 1200);
+      }
+
+    } catch (err) {
+      console.error(err);
+    }
+  }, 2000);
+}
+</script>
+
+</body>
+</html>
