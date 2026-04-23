@@ -574,35 +574,42 @@ async function uploadVideo() {
     return;
   }
 
-  const name = localStorage.getItem("yourName");
-
   const formData = new FormData();
   formData.append("video", videoBlob, "recording.webm");
-  formData.append("name", name);
   formData.append("task", "clue2");
 
   try {
     document.getElementById("statusText").innerText = "Uploading...";
 
-    await fetch("https://clear-condition.onrender.com/upload", {
+     const res = await fetch("https://clear-condition.onrender.com/upload", {
       method: "POST",
-      body: formData
+      body: formData,
+      credentials: "include"
     });
+
+     if (!res.ok) {
+      const text = await res.text();
+      alert("Upload failed: " + text);
+      return;
+    }
 
     // go to waiting screen
     show("pendingScreen");
 
-    startPolling(name);
+    startPolling();
 
   } catch (err) {
     console.error(err);
-    alert("Upload failed");
+    alert("Upload failed: network error");
   }
 }
 
 let pollInterval;
 
-function startPolling(name) {
+function startPolling() {
+  if (!currentUser) return;
+  if (pollInterval) clearInterval(pollInterval);
+  
   pollInterval = setInterval(async () => {
     try {
       const res = await fetch("https://clear-condition.onrender.com/submissions?ts=" + Date.now());
@@ -610,8 +617,11 @@ function startPolling(name) {
 
       // get latest submission for this user + task
       const userSubs = data
-        .filter(s => s.name === name && s.task === "clue2")
-        .sort((a, b) => b.attempt - a.attempt);
+      .filter(s =>
+        (s.name || "").trim().toLowerCase() === currentUser.trim().toLowerCase() &&
+        s.task === "clue2"
+      )
+  .sort((a, b) => (b.attempt || 0) - (a.attempt || 0));
 
       if (userSubs.length === 0) return;
 
@@ -645,7 +655,6 @@ function startPolling(name) {
     }
   }, 2000);
 }
-
 
 async function flipCamera() {
   currentFacingMode = (currentFacingMode === "environment") ? "user" : "environment";
