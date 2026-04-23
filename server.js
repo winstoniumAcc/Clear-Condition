@@ -22,12 +22,13 @@ app.use(express.static(path.join(__dirname)));
 const session = require("express-session");
 
 app.use(session({
-  secret: "supersecretkey", // change this
+  secret: "supersecretkey",
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // keep false for Render (no HTTPS config needed)
-    maxAge: 1000 * 60 * 60 * 2 // 2 hours
+    secure: false,
+    sameSite: "lax",   // 🔥 ADD THIS
+    maxAge: 1000 * 60 * 60 * 2
   }
 }));
 

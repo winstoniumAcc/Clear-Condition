@@ -278,18 +278,6 @@ function show(screen) {
   if (screen !== "scanner") stopScanner();
 }
 
-  if (screen === "pendingScreen") {
-    document.getElementById("loadingText").innerText = "Waiting for approval";
-  }
-
-  if (screen !== "clue2") {
-   stopCamera();
-  }
-   if (screen !== "scanner") {
-   stopScanner();
-  }
-}
-
 // ---------------- START GAME ----------------
 function startGame() {
   let name = document.getElementById("name").value.trim();
@@ -667,8 +655,9 @@ async function register() {
   body: JSON.stringify({ name, password })
 });
 
-  const text = await res.text();
-  document.getElementById("authStatus").innerText = text;
+const text = await res.text();
+console.log("REGISTER RESPONSE:", text);
+document.getElementById("authStatus").innerText = text;
 }
 
 async function login() {
@@ -684,10 +673,12 @@ async function login() {
     body: JSON.stringify({ name, password })
   });
 
-  if (!res.ok) {
-    document.getElementById("authStatus").innerText = "Login failed";
-    return;
-  }
+  const text = await res.text();
+console.log(text);
+if (!res.ok) {
+  document.getElementById("authStatus").innerText = text;
+  return;
+}
 
   const data = await res.json();
 
