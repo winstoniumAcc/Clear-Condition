@@ -1,6 +1,3 @@
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running on port " + PORT));
-
 const fs = require("fs");
 const path = require("path");
 
@@ -12,6 +9,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/videos", express.static("videos"));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Server running on port " + PORT));
 
 // STORAGE
 const storage = multer.diskStorage({
