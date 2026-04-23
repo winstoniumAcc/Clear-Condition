@@ -19,6 +19,18 @@ app.use(express.json());
 app.use("/videos", express.static("videos"));
 app.use(express.static(path.join(__dirname)));
 
+const session = require("express-session");
+
+app.use(session({
+  secret: "supersecretkey", // change this
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // keep false for Render (no HTTPS config needed)
+    maxAge: 1000 * 60 * 60 * 2 // 2 hours
+  }
+}));
+
 const usersFile = path.join(__dirname, "users.json");
 
 // create file if not exists
@@ -77,7 +89,10 @@ app.post("/upload", upload.single("video"), (req, res) => {
     return res.status(400).send("No file uploaded");
   }
 
-  const name = req.body.name;
+  const name = req.session.user;
+  if (!name) {
+    return res.status(401).send("Not logged in");
+  }
   const task = req.body.task;
 
   // 🔒 LOGIN CHECK HERE
@@ -175,8 +190,9 @@ app.post("/login", async (req, res) => {
   if (!user) return res.status(401).send("Wrong login");
 
   const match = await bcrypt.compare(password, user.password);
-
   if (!match) return res.status(401).send("Wrong login");
+
+  req.session.user = user.name; // 🔥 IMPORTANT
 
   res.json({ success: true });
 });
@@ -186,7 +202,7 @@ app.post("/admin-login", (req, res) => {
 
   const { password } = req.body;
 
-  if (password && password.trim() === "A") {
+  if (password && password.trim() === "WinSkill") {
     res.json({ success: true });
   } else {
     res.status(401).send("Wrong password");

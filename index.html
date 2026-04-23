@@ -85,8 +85,13 @@
 <div id="home" class="screen active">
   <div class="card-ui text-center">
     <h2>🧭 Clear Condition</h2>
-    <input id="yourName" class="form-control mb-3" placeholder="Your name">
-    <button class="btn btn-primary w-100 btn-game" onclick="startGame()">Start Game</button>
+    <input id="name" class="form-control mb-2" placeholder="Your name">
+    <input id="password" type="password" class="form-control mb-3" placeholder="Password">
+
+    <button class="btn btn-success w-100 mb-2" onclick="register()">Register</button>
+    <button class="btn btn-primary w-100" onclick="login()">Login</button>
+
+    <p id="authStatus" class="mt-2 text-warning"></p>
   </div>
 </div>
 
@@ -231,6 +236,11 @@ const names = [
 let assignedGroup = null;
 let spinning = false;
 
+window.onload = () => {
+  const saved = localStorage.getItem("user");
+  if (saved) currentUser = saved;
+};
+
 function playTransition(callback) {
   let activeScreen = document.querySelector(".screen.active .card-ui");
 
@@ -248,13 +258,9 @@ function show(screen) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById(screen).classList.add("active");
 
-  // 🔥 SAVE SCREEN STATE
-  // localStorage.setItem("currentScreen", screen);
-
-    if (screen === "clue2") {
+  if (screen === "clue2") {
     document.getElementById("statusText").innerText = "";
-    
-    // reset video preview
+
     const video = document.getElementById("preview");
     video.src = "";
     video.srcObject = null;
@@ -267,11 +273,26 @@ function show(screen) {
   if (screen === "pendingScreen") {
     document.getElementById("loadingText").innerText = "Waiting for approval";
   }
+
+  if (screen !== "clue2") stopCamera();
+  if (screen !== "scanner") stopScanner();
+}
+
+  if (screen === "pendingScreen") {
+    document.getElementById("loadingText").innerText = "Waiting for approval";
+  }
+
+  if (screen !== "clue2") {
+   stopCamera();
+  }
+   if (screen !== "scanner") {
+   stopScanner();
+  }
 }
 
 // ---------------- START GAME ----------------
 function startGame() {
-  let name = document.getElementById("yourName").value.trim();
+  let name = document.getElementById("name").value.trim();
 
   let index = names.indexOf(name);
 
@@ -388,43 +409,54 @@ function shake(el) {
 
 // ---------------- QR SCANNER ----------------
 function startScanner() {
+  if (html5QrCode) {
+    html5QrCode.stop().catch(() => {}).then(() => html5QrCode.clear());
+  }
+
   show("scanner");
 
   html5QrCode = new Html5Qrcode("reader");
 
-  Html5Qrcode.getCameras().then(devices => {
-
-  let cameraConfig = { facingMode: currentFacingMode };
-
-  html5QrCode.start(
-    cameraConfig,
-    { fps: 10, qrbox: 250 },
-    onScanSuccess
-  );
-
+  Html5Qrcode.getCameras().then(() => {
+    html5QrCode.start(
+      { facingMode: currentFacingMode },
+      { fps: 10, qrbox: 250 },
+      onScanSuccess
+    );
   }).catch(err => {
     alert("Camera error: " + err);
   });
 }
 
 // ---------------- QR RESULT ----------------
+let scanning = false;
+
 function onScanSuccess(decodedText) {
+  if (scanning) return;
+  scanning = true;
 
- html5QrCode.stop().then(() => html5QrCode.clear());
+  const expectedQR = "CLUE" + (currentClue + 1);
 
-  let expectedQR = "CLUE" + (currentClue + 1);
+  html5QrCode.stop()
+    .then(() => html5QrCode.clear())
+    .then(() => {
+      if (decodedText === expectedQR) {
+        currentClue++;
 
-  if (decodedText === expectedQR) {
+        playTransition(() => {
+          show("clue" + currentClue);
+        });
 
-    currentClue++;
-
-    playTransition(() => {
-      show("clue" + currentClue);
+      } else {
+        alert("Wrong QR Code!");
+        show("success" + currentClue);
+      }
+    })
+    .finally(() => {
+      setTimeout(() => {
+        scanning = false;
+      }, 1000);
     });
-  } else {
-    alert("Wrong QR Code!");
-    show("success" + currentClue);
-  }
 }
 
 // ---------------- STOP SCANNER ----------------
@@ -437,6 +469,7 @@ function stopScanner() {
 let mediaRecorder;
 let recordedChunks = [];
 let videoBlob;
+let currentUser = null;
 let cameraStream = null;
 let isRecording = false;
 let isProcessing = false;
@@ -524,7 +557,7 @@ function stopRecording() {
 
 function stopCamera() {
   if (cameraStream) {
-    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream.getTracks().forEach(t => t.stop());
     cameraStream = null;
   }
 }
@@ -537,11 +570,8 @@ async function uploadVideo() {
     return;
   }
 
-  const name = localStorage.getItem("yourName");
-
   const formData = new FormData();
   formData.append("video", videoBlob, "recording.webm");
-  formData.append("name", name);
   formData.append("task", "clue2");
 
   try {
@@ -549,13 +579,14 @@ async function uploadVideo() {
 
     await fetch("https://clear-condition.onrender.com/upload", {
       method: "POST",
-      body: formData
+      body: formData,
+      credentials: "include"
     });
 
     // go to waiting screen
     show("pendingScreen");
 
-    startPolling(name);
+    startPolling();
 
   } catch (err) {
     console.error(err);
@@ -565,7 +596,8 @@ async function uploadVideo() {
 
 let pollInterval;
 
-function startPolling(name) {
+function startPolling() {
+  if (!currentUser) return;
   pollInterval = setInterval(async () => {
     try {
       const res = await fetch("https://clear-condition.onrender.com/submissions?ts=" + Date.now());
@@ -573,7 +605,7 @@ function startPolling(name) {
 
       // get latest submission for this user + task
       const userSubs = data
-        .filter(s => s.name === name && s.task === "clue2")
+        .filter(s => s.name === currentUser && s.task === "clue2")
         .sort((a, b) => b.attempt - a.attempt);
 
       if (userSubs.length === 0) return;
@@ -621,6 +653,49 @@ async function flipCamera() {
     }, 300);
 
     return;
+  }
+}
+
+async function register() {
+  const name = document.getElementById("name").value.trim();
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("https://clear-condition.onrender.com/register", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify({ name, password })
+});
+
+  const text = await res.text();
+  document.getElementById("authStatus").innerText = text;
+}
+
+async function login() {
+  const name = document.getElementById("name").value.trim();
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("https://clear-condition.onrender.com/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    credentials: "include", // 🔥 IMPORTANT (session cookie)
+    body: JSON.stringify({ name, password })
+  });
+
+  if (!res.ok) {
+    document.getElementById("authStatus").innerText = "Login failed";
+    return;
+  }
+
+  const data = await res.json();
+
+  if (data.success) {
+    currentUser = name;
+    localStorage.setItem("user", name);
+    document.getElementById("authStatus").innerText = "Logged in!";
+    startGame();
   }
 }
 </script>
