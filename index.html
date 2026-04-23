@@ -648,45 +648,67 @@ async function register() {
   const name = document.getElementById("name").value.trim();
   const password = document.getElementById("password").value;
 
-  const res = await fetch("https://clear-condition.onrender.com/register", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  credentials: "include",
-  body: JSON.stringify({ name, password })
-});
+  try {
+    const res = await fetch("https://clear-condition.onrender.com/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ name, password })
+    });
 
-const text = await res.text();
-console.log("REGISTER RESPONSE:", text);
-document.getElementById("authStatus").innerText = text;
+    const text = await res.text();
+
+    if (res.ok) {
+      alert("✅ Register successful!");
+      document.getElementById("authStatus").innerText = "Registered!";
+    } else {
+      alert("❌ " + text);
+      document.getElementById("authStatus").innerText = text;
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("⚠️ Server error during register");
+  }
 }
 
 async function login() {
   const name = document.getElementById("name").value.trim();
   const password = document.getElementById("password").value;
 
-  const res = await fetch("https://clear-condition.onrender.com/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    credentials: "include", // 🔥 IMPORTANT (session cookie)
-    body: JSON.stringify({ name, password })
-  });
+  try {
+    const res = await fetch("https://clear-condition.onrender.com/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify({ name, password })
+    });
 
-  const text = await res.text();
-console.log(text);
-if (!res.ok) {
-  document.getElementById("authStatus").innerText = text;
-  return;
-}
+    const text = await res.text();
 
-  const data = await res.json();
+    if (!res.ok) {
+      alert("❌ " + text);
+      document.getElementById("authStatus").innerText = text;
+      return;
+    }
 
-  if (data.success) {
-    currentUser = name;
-    localStorage.setItem("user", name);
-    document.getElementById("authStatus").innerText = "Logged in!";
-    startGame();
+    const data = JSON.parse(text);
+
+    if (data.success) {
+      currentUser = name;
+      localStorage.setItem("user", name);
+
+      alert("✅ Login successful!");
+      document.getElementById("authStatus").innerText = "Logged in!";
+
+      startGame();
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("⚠️ Server error during login");
   }
 }
 </script>
