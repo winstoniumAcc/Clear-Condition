@@ -703,7 +703,7 @@ async function login() {
     const text = await res.text();
 
     if (!res.ok) {
-      alert("❌ " + text);
+      alert("❌ Login failed");
       return;
     }
 

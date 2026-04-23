@@ -86,14 +86,15 @@ let submissions = [];
 // UPLOAD
 app.post("/upload", upload.single("video"), (req, res) => {
 
-  if (!req.file) {
-    return res.status(400).send("No file uploaded");
-  }
-
   const name = req.session.user;
   if (!name) {
     return res.status(401).send("Not logged in");
   }
+
+  if (!req.file) {
+    return res.status(400).send("No file uploaded");
+  }
+
   const task = req.body.task;
 
   // 🔒 LOGIN CHECK HERE
@@ -136,18 +137,26 @@ app.get("/submissions", (req, res) => {
   res.json(submissions);
 });
 
-// APPROVE
 app.post("/approve/:id", (req, res) => {
   const item = submissions.find(s => s.id == req.params.id);
-  if (item) item.status = "approved";
-  res.sendStatus(200);
+
+  if (!item) {
+    return res.status(404).send("Submission not found");
+  }
+
+  item.status = "approved";
+  res.status(200).send("Approved");
 });
 
-// REJECT
 app.post("/reject/:id", (req, res) => {
   const item = submissions.find(s => s.id == req.params.id);
-  if (item) item.status = "rejected";
-  res.sendStatus(200);
+
+  if (!item) {
+    return res.status(404).send("Submission not found");
+  }
+
+  item.status = "rejected";
+  res.status(200).send("Rejected");
 });
 
 app.get("/reset", (req, res) => {

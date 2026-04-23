@@ -40,8 +40,8 @@ async function load() {
       <div style="margin-bottom:20px">
         <p>${item.name} - ${item.task} (${item.status})</p>
         <video src="https://clear-condition.onrender.com/videos/${item.file}" controls width="200"></video><br>
-        <button onclick="approve(${item.id})">Approve</button>
-        <button onclick="reject(${item.id})">Reject</button>
+        <button onclick="approve('${item.id}')">Approve</button>
+        <button onclick="reject('${item.id}')">Reject</button>
       </div>
     `;
   });
@@ -62,8 +62,8 @@ async function reject(id) {
   if (ok) {
     load();
 
-    // 🔥 start auto refresh ONLY after login
-    setInterval(load, 3000);
+    // // 🔥 start auto refresh ONLY after login
+    // setInterval(load, 3000);
   }
 })();
 </script>
