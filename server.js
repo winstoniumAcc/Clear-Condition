@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const bcrypt = require("bcrypt");
 
 // 🔥 ensure videos folder exists
 const videosDir = path.join(__dirname, "videos");
@@ -18,6 +19,45 @@ app.use(express.json());
 app.use("/videos", express.static("videos"));
 app.use(express.static(path.join(__dirname)));
 
+const usersFile = path.join(__dirname, "users.json");
+
+// create file if not exists
+if (!fs.existsSync(usersFile)) {
+  fs.writeFileSync(usersFile, JSON.stringify([
+    { "name": "Alvaro", "password": null },
+    { "name": "Ben", "password": null },
+    { "name": "Bryan", "password": null },
+    { "name": "Cathleen", "password": null },
+    { "name": "Cheryl", "password": null },
+    { "name": "Christian", "password": null },
+    { "name": "Cliff", "password": null },
+    { "name": "Felix", "password": null },
+    { "name": "Frederick", "password": null },
+    { "name": "Gizelle", "password": null },
+    { "name": "Grace", "password": null },
+    { "name": "Gwillbert", "password": null },
+    { "name": "Jasmine", "password": null },
+    { "name": "Jeniffer", "password": null },
+    { "name": "Jessica", "password": null },
+    { "name": "Kathleen", "password": null },
+    { "name": "Keiko", "password": null },
+    { "name": "Sin", "password": null },
+    { "name": "Viona", "password": null },
+    { "name": "Priscilla", "password": null },
+    { "name": "Victor", "password": null },
+    { "name": "Wendellyne", "password": null },
+    { "name": "Winston", "password": null }
+  ], null, 2));
+}
+
+function getUsers() {
+  return JSON.parse(fs.readFileSync(usersFile));
+}
+
+function saveUsers(users) {
+  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
+}
+
 // STORAGE
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, videosDir),
@@ -34,11 +74,19 @@ let submissions = [];
 app.post("/upload", upload.single("video"), (req, res) => {
 
   if (!req.file) {
-  return res.status(400).send("No file uploaded");
-}
+    return res.status(400).send("No file uploaded");
+  }
 
   const name = req.body.name;
   const task = req.body.task;
+
+  // 🔒 LOGIN CHECK HERE
+  const users = getUsers();
+  const user = users.find(u => u.name === name);
+
+  if (!user || !user.password) {
+    return res.status(401).send("Not logged in");
+  }
 
   // count attempts
   const attemptCount = submissions.filter(
@@ -46,7 +94,7 @@ app.post("/upload", upload.single("video"), (req, res) => {
   ).length + 1;
 
   const entry = {
-    id: Date.now() + Math.random(), // 🔥 unique ID
+    id: Date.now() + Math.random(),
     name,
     task,
     attempt: attemptCount,
@@ -99,6 +147,50 @@ app.get("/reset", (req, res) => {
   console.log("SERVER RESET: all submissions and videos deleted");
 
   res.send("✅ Reset complete (videos + data cleared)");
+});
+
+app.post("/register", async (req, res) => {
+  const { name, password } = req.body;
+
+  let users = getUsers();
+  const user = users.find(u => u.name === name);
+
+  if (!user) return res.status(400).send("Invalid name");
+  if (user.password) return res.status(400).send("Already registered");
+
+  const hashed = await bcrypt.hash(password, 10);
+  user.password = hashed;
+
+  saveUsers(users);
+
+  res.send("Registered");
+});
+
+app.post("/login", async (req, res) => {
+  const { name, password } = req.body;
+
+  let users = getUsers();
+  const user = users.find(u => u.name === name);
+
+  if (!user) return res.status(401).send("Wrong login");
+
+  const match = await bcrypt.compare(password, user.password);
+
+  if (!match) return res.status(401).send("Wrong login");
+
+  res.json({ success: true });
+});
+
+app.post("/admin-login", (req, res) => {
+  console.log("ADMIN LOGIN BODY:", req.body);
+
+  const { password } = req.body;
+
+  if (password && password.trim() === "A") {
+    res.json({ success: true });
+  } else {
+    res.status(401).send("Wrong password");
+  }
 });
 
 const PORT = process.env.PORT || 3000;
