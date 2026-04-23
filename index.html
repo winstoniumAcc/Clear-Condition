@@ -126,7 +126,7 @@
 <!-- PENDING -->
 <div id="pendingScreen" class="screen">
   <div class="card-ui text-center">
-    <h4>📤 Uploading Task...</h4>
+    <h4>📤 Task Uploaded</h4>
     <div class="spinner-border text-light my-3"></div>
     <h5 id="loadingText">Waiting for approval</h5>
     <p class="text-muted">Please wait...</p>
@@ -250,6 +250,23 @@ function show(screen) {
 
   // 🔥 SAVE SCREEN STATE
   // localStorage.setItem("currentScreen", screen);
+
+    if (screen === "clue2") {
+    document.getElementById("statusText").innerText = "";
+    
+    // reset video preview
+    const video = document.getElementById("preview");
+    video.src = "";
+    video.srcObject = null;
+    video.controls = false;
+
+    videoBlob = null;
+    recordedChunks = [];
+  }
+
+  if (screen === "pendingScreen") {
+    document.getElementById("loadingText").innerText = "Waiting for approval";
+  }
 }
 
 // ---------------- START GAME ----------------
@@ -534,8 +551,6 @@ async function uploadVideo() {
       method: "POST",
       body: formData
     });
-
-    document.getElementById("statusText").innerText = "Uploaded! Waiting approval...";
 
     // go to waiting screen
     show("pendingScreen");
