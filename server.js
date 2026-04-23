@@ -18,9 +18,6 @@ app.use(express.json());
 app.use("/videos", express.static("videos"));
 app.use(express.static(path.join(__dirname)));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running on port " + PORT));
-
 // STORAGE
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, videosDir),
@@ -35,6 +32,10 @@ let submissions = [];
 
 // UPLOAD
 app.post("/upload", upload.single("video"), (req, res) => {
+
+  if (!req.file) {
+  return res.status(400).send("No file uploaded");
+}
 
   const name = req.body.name;
   const task = req.body.task;
@@ -86,9 +87,19 @@ app.post("/reject/:id", (req, res) => {
 });
 
 app.get("/reset", (req, res) => {
-  submissions = []; // clear all data
+  const videosDir = path.join(__dirname, "videos");
 
-  console.log("SERVER RESET: submissions cleared");
+  // delete all files in videos folder
+  fs.readdirSync(videosDir).forEach(file => {
+    fs.unlinkSync(path.join(videosDir, file));
+  });
 
-  res.send("✅ Server reset done");
+  submissions = [];
+
+  console.log("SERVER RESET: all submissions and videos deleted");
+
+  res.send("✅ Reset complete (videos + data cleared)");
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Server running on port " + PORT));
