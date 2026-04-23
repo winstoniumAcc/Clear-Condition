@@ -14,7 +14,10 @@ const multer = require("multer");
 const cors = require("cors");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 app.use(express.json());
 app.use("/videos", express.static("videos"));
 app.use(express.static(path.join(__dirname)));
@@ -25,9 +28,10 @@ app.use(session({
   secret: "supersecretkey",
   resave: false,
   saveUninitialized: false,
+  proxy: true,
   cookie: {
-    secure: false,
-    sameSite: "lax",   // 🔥 ADD THIS
+    secure: true,        // IMPORTANT for Render HTTPS
+    sameSite: "none",    // REQUIRED for cross-site
     maxAge: 1000 * 60 * 60 * 2
   }
 }));

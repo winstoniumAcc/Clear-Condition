@@ -591,14 +591,6 @@ async function uploadVideo() {
     const text = await res.text();
     console.log("UPLOAD RESPONSE:", res.status, text);
 
-    // 🔥 THIS is the fix
-    if (!res.ok) {
-      alert("Upload failed: " + text);
-      document.getElementById("statusText").innerText = "Upload failed ❌";
-      return;
-    }
-
-    // ✅ only success goes here
     show("pendingScreen");
     startPolling();
 
@@ -620,7 +612,7 @@ function startPolling() {
 
       // get latest submission for this user + task
       const userSubs = data
-        .filter(s => s.name === "Winston" && s.task === "clue2")
+        .filter(s => s.name === currentUser && s.task === "clue2")
         .sort((a, b) => b.attempt - a.attempt);
 
       if (userSubs.length === 0) return;
