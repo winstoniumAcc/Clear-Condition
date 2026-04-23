@@ -623,12 +623,7 @@ function startPolling() {
       console.log("ALL SUBMISSIONS:", data);
 
       // get latest submission for this user + task
-      const userSubs = data
-      .filter(s =>
-        (s.name || "").trim().toLowerCase() === currentUser.trim().toLowerCase() &&
-        s.task === "clue2"
-      )
-  .sort((a, b) => (b.attempt || 0) - (a.attempt || 0));
+    const userSubs = data .filter(s => s.name === currentUser && s.task === "clue2") .sort((a, b) => b.attempt - a.attempt);
 
   console.log("USER SUBMISSIONS:", userSubs);
 
