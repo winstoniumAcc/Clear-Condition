@@ -141,27 +141,20 @@ app.get("/submissions", (req, res) => {
   res.json(submissions);
 });
 
+// APPROVE
 app.post("/approve/:id", (req, res) => {
   const item = submissions.find(s => s.id == req.params.id);
-
-  if (!item) {
-    return res.status(404).send("Submission not found");
-  }
-
-  item.status = "approved";
-  res.status(200).send("Approved");
+  if (item) item.status = "approved";
+  res.sendStatus(200);
 });
 
+// REJECT
 app.post("/reject/:id", (req, res) => {
   const item = submissions.find(s => s.id == req.params.id);
-
-  if (!item) {
-    return res.status(404).send("Submission not found");
-  }
-
-  item.status = "rejected";
-  res.status(200).send("Rejected");
+  if (item) item.status = "rejected";
+  res.sendStatus(200);
 });
+
 
 app.get("/reset", (req, res) => {
   const videosDir = path.join(__dirname, "videos");
