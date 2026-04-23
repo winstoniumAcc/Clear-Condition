@@ -577,24 +577,35 @@ async function uploadVideo() {
   const formData = new FormData();
   formData.append("video", videoBlob, "recording.webm");
   formData.append("task", "clue2");
+  formData.append("name", currentUser);
 
   try {
     document.getElementById("statusText").innerText = "Uploading...";
 
-    await fetch("https://clear-condition.onrender.com/upload", {
+    const res = await fetch("https://clear-condition.onrender.com/upload", {
       method: "POST",
       body: formData,
       credentials: "include"
     });
 
-    // go to waiting screen
-    show("pendingScreen");
+    const text = await res.text();
+    console.log("UPLOAD RESPONSE:", res.status, text);
 
+    // 🔥 THIS is the fix
+    if (!res.ok) {
+      alert("Upload failed: " + text);
+      document.getElementById("statusText").innerText = "Upload failed ❌";
+      return;
+    }
+
+    // ✅ only success goes here
+    show("pendingScreen");
     startPolling();
 
   } catch (err) {
-    console.error(err);
-    alert("Upload failed");
+    console.error("FETCH ERROR:", err);
+    alert("Upload failed (network error)");
+    document.getElementById("statusText").innerText = "Upload failed ❌";
   }
 }
 
@@ -609,7 +620,7 @@ function startPolling() {
 
       // get latest submission for this user + task
       const userSubs = data
-        .filter(s => s.name === currentUser && s.task === "clue2")
+        .filter(s => s.name === "Winston" && s.task === "clue2")
         .sort((a, b) => b.attempt - a.attempt);
 
       if (userSubs.length === 0) return;
