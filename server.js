@@ -1,6 +1,13 @@
 const fs = require("fs");
 const path = require("path");
 
+// 🔥 ensure videos folder exists
+const videosDir = path.join(__dirname, "videos");
+
+if (!fs.existsSync(videosDir)) {
+  fs.mkdirSync(videosDir);
+}
+
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
@@ -15,7 +22,7 @@ app.listen(PORT, () => console.log("Server running on port " + PORT));
 
 // STORAGE
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "videos/"),
+  destination: (req, file, cb) => cb(null, videosDir),
   filename: (req, file, cb) => {
     cb(null, Date.now() + ".webm");
   }
