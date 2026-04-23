@@ -84,5 +84,3 @@ app.get("/reset", (req, res) => {
 
   res.send("✅ Server reset done");
 });
-
-app.listen(3000, () => console.log("Server running on port 3000"));
