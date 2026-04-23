@@ -577,27 +577,30 @@ async function uploadVideo() {
   const formData = new FormData();
   formData.append("video", videoBlob, "recording.webm");
   formData.append("task", "clue2");
-  formData.append("name", currentUser);
 
   try {
     document.getElementById("statusText").innerText = "Uploading...";
 
-    const res = await fetch("https://clear-condition.onrender.com/upload", {
+     const res = await fetch("https://clear-condition.onrender.com/upload", {
       method: "POST",
       body: formData,
       credentials: "include"
     });
 
-    const text = await res.text();
-    console.log("UPLOAD RESPONSE:", res.status, text);
+     if (!res.ok) {
+      const text = await res.text();
+      alert("Upload failed: " + text);
+      return;
+    }
 
+    // go to waiting screen
     show("pendingScreen");
+
     startPolling();
 
   } catch (err) {
-    console.error("FETCH ERROR:", err);
-    alert("Upload failed (network error)");
-    document.getElementById("statusText").innerText = "Upload failed ❌";
+    console.error(err);
+    alert("Upload failed: network error");
   }
 }
 
@@ -605,6 +608,8 @@ let pollInterval;
 
 function startPolling() {
   if (!currentUser) return;
+  if (pollInterval) clearInterval(pollInterval);
+  
   pollInterval = setInterval(async () => {
     try {
       const res = await fetch("https://clear-condition.onrender.com/submissions?ts=" + Date.now());
