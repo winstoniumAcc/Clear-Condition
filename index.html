@@ -530,7 +530,7 @@ async function uploadVideo() {
   try {
     document.getElementById("statusText").innerText = "Uploading...";
 
-    await fetch("http://localhost:3000/upload", {
+    await fetch("https://clear-condition.onrender.com/upload", {
       method: "POST",
       body: formData
     });
