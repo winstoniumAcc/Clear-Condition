@@ -587,6 +587,12 @@ async function uploadVideo() {
       credentials: "include"
     });
 
+    console.log("UPLOAD STATUS:", res.status);
+
+    const text = await res.text();
+
+    console.log("UPLOAD RESPONSE:", text);
+
      if (!res.ok) {
       const text = await res.text();
       alert("Upload failed: " + text);
@@ -615,6 +621,8 @@ function startPolling() {
       const res = await fetch("https://clear-condition.onrender.com/submissions?ts=" + Date.now());
       const data = await res.json();
 
+      console.log("ALL SUBMISSIONS:", data);
+
       // get latest submission for this user + task
       const userSubs = data
       .filter(s =>
@@ -623,9 +631,13 @@ function startPolling() {
       )
   .sort((a, b) => (b.attempt || 0) - (a.attempt || 0));
 
+  console.log("USER SUBMISSIONS:", userSubs);
+
       if (userSubs.length === 0) return;
 
       const latest = userSubs[0];
+
+       console.log("LATEST STATUS:", latest.status);
 
       if (latest.status === "approved") {
         clearInterval(pollInterval);
