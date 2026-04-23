@@ -397,23 +397,39 @@ function shake(el) {
 
 // ---------------- QR SCANNER ----------------
 function startScanner() {
-  if (html5QrCode) {
-    html5QrCode.stop().catch(() => {}).then(() => html5QrCode.clear());
-  }
-
   show("scanner");
 
   html5QrCode = new Html5Qrcode("reader");
 
-  Html5Qrcode.getCameras().then(() => {
-    html5QrCode.start(
-      { facingMode: currentFacingMode },
-      { fps: 10, qrbox: 250 },
-      onScanSuccess
-    );
-  }).catch(err => {
-    alert("Camera error: " + err);
-  });
+  Html5Qrcode.getCameras()
+    .then((devices) => {
+      if (!devices || devices.length === 0) {
+        alert("No camera found");
+        return;
+      }
+
+      // pick back camera if available
+      let cameraId = devices[0].id;
+
+      const backCam = devices.find(d =>
+        d.label.toLowerCase().includes("back")
+      );
+
+      if (backCam) cameraId = backCam.id;
+
+      return html5QrCode.start(
+        cameraId,
+        {
+          fps: 10,
+          qrbox: 250
+        },
+        onScanSuccess
+      );
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Camera error: " + err);
+    });
 }
 
 // ---------------- QR RESULT ----------------
@@ -660,10 +676,8 @@ async function register() {
 
     if (res.ok) {
       alert("✅ Register successful!");
-      document.getElementById("authStatus").innerText = "Registered!";
     } else {
       alert("❌ " + text);
-      document.getElementById("authStatus").innerText = text;
     }
 
   } catch (err) {
@@ -690,7 +704,6 @@ async function login() {
 
     if (!res.ok) {
       alert("❌ " + text);
-      document.getElementById("authStatus").innerText = text;
       return;
     }
 
@@ -701,7 +714,6 @@ async function login() {
       localStorage.setItem("user", name);
 
       alert("✅ Login successful!");
-      document.getElementById("authStatus").innerText = "Logged in!";
 
       startGame();
     }
