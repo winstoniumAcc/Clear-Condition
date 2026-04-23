@@ -3,7 +3,7 @@
 
 <script>
 async function load() {
-  const res = await fetch("http://localhost:3000/submissions");
+  const res = await fetch("https://clear-condition.onrender.com/submissions");
   const data = await res.json();
 
   const container = document.getElementById("list");
@@ -13,7 +13,7 @@ async function load() {
     container.innerHTML += `
       <div style="margin-bottom:20px">
         <p>${item.name} - ${item.task} (${item.status})</p>
-        <video src="http://localhost:3000/videos/${item.file}" controls width="200"></video><br>
+        <video src="https://clear-condition.onrender.com/videos/${item.file}" controls width="200"></video><br>
         <button onclick="approve(${item.id})">Approve</button>
         <button onclick="reject(${item.id})">Reject</button>
       </div>
@@ -22,12 +22,12 @@ async function load() {
 }
 
 async function approve(id) {
-  await fetch("http://localhost:3000/approve/" + id, { method: "POST" });
+  await fetch("https://clear-condition.onrender.com/approve/" + id, { method: "POST" });
   load();
 }
 
 async function reject(id) {
-  await fetch("http://localhost:3000/reject/" + id, { method: "POST" });
+  await fetch("https://clear-condition.onrender.com/reject/" + id, { method: "POST" });
   load();
 }
 
