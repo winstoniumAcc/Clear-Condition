@@ -261,6 +261,13 @@
   </div>
 </div>
 
+<!-- NOTIFICATION TOAST -->
+<div id="qteToast" class="toast position-fixed top-0 end-0 m-3 text-bg-danger" role="alert">
+  <div class="toast-body">
+    ⚠️ QTE STARTING IN <span id="qteCountdown">0</span>s
+  </div>
+</div>
+
 <script>
 let currentClue = 1;
 let html5QrCode;
@@ -855,6 +862,48 @@ function goDashboard() {
   updateDashboard();
   show("playerHome");
 }
+
+let qteActive = false;
+
+async function checkQTE() {
+  try {
+    let res = await fetch("https://clear-condition.onrender.com/qte");
+
+    if (!res.ok) {
+      console.log("QTE route not found:", res.status);
+      return;
+    }
+
+    let data = await res.json();
+
+    console.log("QTE DATA:", data);
+
+  } catch (err) {
+    console.log("QTE fetch failed:", err);
+  }
+}
+
+function startQTECountdown(endTime) {
+  const toastEl = document.getElementById("qteToast");
+  const countdownEl = document.getElementById("qteCountdown");
+
+  let toast = new bootstrap.Toast(toastEl);
+  toast.show();
+
+  let interval = setInterval(() => {
+    let timeLeft = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+
+    countdownEl.innerText = timeLeft;
+
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      toast.hide();
+      qteActive = false;
+    }
+  }, 1000);
+}
+
+setInterval(checkQTE, 2000);
 
 setInterval(loadLeaderboard, 3000);
 </script>

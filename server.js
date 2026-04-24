@@ -38,6 +38,12 @@ app.use(session({
 
 const usersFile = path.join(__dirname, "users.json");
 
+let qte = {
+  active: false,
+  action: null,
+  endTime: null
+};
+
 // create file if not exists
 if (!fs.existsSync(usersFile)) {
   fs.writeFileSync(usersFile, JSON.stringify([
@@ -269,6 +275,32 @@ app.get("/leaderboard", (req, res) => {
 
   res.json(sorted);
 });
+
+app.get("/qte", (req, res) => {
+  res.json({
+    active: false
+  });
+});
+
+app.post("/qte/start", (req, res) => {
+  const { duration, action } = req.body;
+
+  qte.active = true;
+  qte.action = action || "tap";
+  qte.endTime = Date.now() + duration;
+
+  res.send("QTE started");
+});
+
+app.post("/qte/end", (req, res) => {
+  qte.active = false;
+  qte.action = null;
+  qte.endTime = null;
+
+  res.send("QTE ended");
+});
+
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Server running on port " + PORT));
