@@ -878,6 +878,7 @@ function goDashboard() {
 let qteCountdownInterval = null;
 let qteInterval = null;
 let qteActive = false;
+let qteStartedThisRound = false;
 
 function checkQTE() {
   fetch("https://clear-condition.onrender.com/qte-status")
@@ -888,21 +889,32 @@ function checkQTE() {
       const qte = data.data;
       const now = Date.now();
 
+      // reset per new QTE cycle
+      if (!qteActive && !qteCountdownInterval && !qteInterval) {
+        qteStartedThisRound = false;
+      }
+
       // 🔵 COUNTDOWN PHASE
       if (now < qte.startAt) {
         startCountdown(qte);
         return;
       }
 
-      // 🔴 ACTIVE PHASE
-      if (now >= qte.startAt && now <= qte.endsAt) {
+      // 🔴 START QTE ONLY ONCE
+      if (
+        now >= qte.startAt &&
+        now <= qte.endsAt &&
+        !qteStartedThisRound
+      ) {
         startQTE(qte);
+        qteStartedThisRound = true;
         return;
       }
 
       // ⚫ AUTO END
       if (now > qte.endsAt) {
         endQTE();
+        qteStartedThisRound = false;
       }
     });
 }
@@ -998,7 +1010,7 @@ function endQTE() {
   });
 }
 
-setInterval(checkQTE, 1000);
+setInterval(checkQTE, 250);
 
 setInterval(loadLeaderboard, 3000);
 </script>
