@@ -279,14 +279,18 @@ app.get("/leaderboard", (req, res) => {
 app.post("/admin/start-qte", (req, res) => {
   const { title, duration } = req.body;
 
+  const countdown = 15; // 🔥 15 seconds pre-start
+
+  const startAt = Date.now() + countdown * 1000;
+
   qteActive = true;
-  const startAt = Date.now();
 
   qteData = {
     title,
+    countdownStart: Date.now(),
     startAt,
     endsAt: startAt + duration * 1000
-};
+  };
 
   res.json({ success: true });
 });
