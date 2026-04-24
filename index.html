@@ -332,8 +332,6 @@ function startGame() {
   }
 
   if (!name) return;
-  localStorage.setItem("yourName", name);
-
   // determine group (rigged)
   if (index <= 4) assignedGroup = 1;
   else if (index <= 9) assignedGroup = 2;
@@ -426,6 +424,7 @@ function spinWheel() {
 
   setTimeout(() => {
     spinning = false;
+    localStorage.setItem("group", assignedGroup);
     alert("You got Group " + assignedGroup + " 🎉");
     updateDashboard();
     show("playerHome");
@@ -441,9 +440,8 @@ function shake(el) {
 
 async function updateDashboard() {
 
-  let name = localStorage.getItem("yourName");
+  let name = localStorage.getItem("user");
   let group = localStorage.getItem("group");
-  let pts = localStorage.getItem("points") || 0;
 
   document.getElementById("displayName").innerText = name;
   document.getElementById("displayGroup").innerText = group;
