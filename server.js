@@ -282,25 +282,19 @@ app.get("/qte", (req, res) => {
   });
 });
 
-app.post("/qte/start", (req, res) => {
-  const { duration, action } = req.body;
+app.post("/start-qte", (req, res) => {
+  const keys = ["A", "S", "D", "F"];
+  const randomKey = keys[Math.floor(Math.random() * keys.length)];
 
-  qte.active = true;
-  qte.action = action || "tap";
-  qte.endTime = Date.now() + duration;
+  currentQTE = {
+    active: true,
+    key: randomKey,
+    startTime: Date.now(),
+    duration: 5000
+  };
 
-  res.send("QTE started");
+  res.send("QTE started: " + randomKey);
 });
-
-app.post("/qte/end", (req, res) => {
-  qte.active = false;
-  qte.action = null;
-  qte.endTime = null;
-
-  res.send("QTE ended");
-});
-
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Server running on port " + PORT));
