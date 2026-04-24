@@ -280,10 +280,13 @@ app.post("/admin/start-qte", (req, res) => {
   const { title, duration } = req.body;
 
   qteActive = true;
+  const startAt = Date.now();
+
   qteData = {
     title,
-    endsAt: Date.now() + duration * 1000
-  };
+    startAt,
+    endsAt: startAt + duration * 1000
+};
 
   res.json({ success: true });
 });
