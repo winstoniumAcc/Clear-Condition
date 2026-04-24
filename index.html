@@ -81,6 +81,43 @@
 
 <body>
 
+<!-- PLAYER HOME DASHBOARD -->
+<div id="playerHome" class="screen">
+  <div class="card-ui text-center">
+
+    <h3>🏠 Your Dashboard</h3>
+
+    <p><b>Name:</b> <span id="displayName"></span></p>
+    <p><b>Group:</b> <span id="displayGroup"></span></p>
+    <p><b>Points:</b> <span id="displayPoints">0</span></p>
+
+    <button class="btn btn-success w-100 mt-3 btn-game"
+      onclick="show('clue1')">
+      Hunt
+    </button>
+    <button class="btn btn-warning w-100 mt-2"
+  onclick="show('leaderboard'); loadLeaderboard();">
+  🏆 Leaderboard
+</button>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+ <div id="leaderboard" class="screen">
+  <div class="card-ui text-center">
+
+    <h3>🏆 Leaderboard</h3>
+
+    <div id="leaderboardList">Loading...</div>
+
+    <button class="btn btn-outline-light w-100 mt-3"
+      onclick="show('playerHome')">
+      Back
+    </button>
+
+  </div>
+</div>
+
 <!-- HOME -->
 <div id="home" class="screen active">
   <div class="card-ui text-center">
@@ -288,6 +325,13 @@ function startGame() {
     return;
   }
 
+   if (localStorage.getItem("group")) {
+    updateDashboard();
+    show("playerHome");
+    return;
+  }
+
+  if (!name) return;
   localStorage.setItem("yourName", name);
 
   // determine group (rigged)
@@ -383,7 +427,8 @@ function spinWheel() {
   setTimeout(() => {
     spinning = false;
     alert("You got Group " + assignedGroup + " 🎉");
-    show("clue1");
+    updateDashboard();
+    show("playerHome");
   }, 4200);
 }
 
@@ -392,6 +437,21 @@ function shake(el) {
   el.classList.remove("shake");
   void el.offsetWidth;
   el.classList.add("shake");
+}
+
+async function updateDashboard() {
+
+  let name = localStorage.getItem("yourName");
+  let group = localStorage.getItem("group");
+  let pts = localStorage.getItem("points") || 0;
+
+  document.getElementById("displayName").innerText = name;
+  document.getElementById("displayGroup").innerText = group;
+
+  let res = await fetch("/points");
+  let data = await res.json();
+
+  document.getElementById("displayPoints").innerText = data[group] || "Failed to fetch (Refresh)";
 }
 
 // ---------------- QR SCANNER ----------------
@@ -740,6 +800,44 @@ async function login() {
     alert("⚠️ Server error during login");
   }
 }
+
+async function addPoints(amount) {
+
+  let group = localStorage.getItem("group");
+
+  await fetch("/add-points", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      group: group,
+      amount: amount
+    })
+  });
+
+}
+
+async function loadLeaderboard() {
+
+  let res = await fetch("https://your-render-url.onrender.com/leaderboard");
+  let data = await res.json();
+
+  let html = "";
+
+  data.forEach((item, index) => {
+    html += `
+      <div class="d-flex justify-content-between p-2 border-bottom">
+        <span>#${index + 1} ${item.group}</span>
+        <b>${item.score}</b>
+      </div>
+    `;
+  });
+
+  document.getElementById("leaderboardList").innerHTML = html;
+}
+
+setInterval(loadLeaderboard, 3000);
 </script>
 
 </body>

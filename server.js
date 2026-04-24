@@ -75,6 +75,16 @@ function saveUsers(users) {
   fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
 }
 
+const pointsFile = path.join(__dirname, "points.json");
+
+function getPoints() {
+  return JSON.parse(fs.readFileSync(pointsFile));
+}
+
+function savePoints(points) {
+  fs.writeFileSync(pointsFile, JSON.stringify(points, null, 2));
+}
+
 // STORAGE
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, videosDir),
@@ -221,6 +231,43 @@ app.post("/admin-login", (req, res) => {
   } else {
     res.status(401).send("Wrong password");
   }
+});
+
+app.get("/points", (req, res) => {
+  const points = getPoints();
+  res.json(points);
+});
+
+app.post("/add-points", (req, res) => {
+  const name = req.session.user;
+  if (!name) return res.status(401).send("Not logged in");
+
+  const { group, amount } = req.body;
+
+  if (!group || typeof amount !== "number") {
+    return res.status(400).send("Invalid data");
+  }
+
+  const points = getPoints();
+
+  if (!points[group]) points[group] = 0;
+
+  points[group] += amount;
+
+  savePoints(points);
+
+  res.json({ success: true, points: points[group] });
+});
+
+app.get("/leaderboard", (req, res) => {
+  const points = getPoints();
+
+  // convert object → array and sort
+  const sorted = Object.entries(points)
+    .map(([group, score]) => ({ group, score }))
+    .sort((a, b) => b.score - a.score);
+
+  res.json(sorted);
 });
 
 const PORT = process.env.PORT || 3000;
