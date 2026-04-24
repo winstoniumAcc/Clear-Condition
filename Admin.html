@@ -1,6 +1,10 @@
 <h2>Submissions</h2>
 <div id="list"></div>
 
+<button class="btn btn-danger w-100 mt-3" onclick="startQTE()">
+  ⚡ Start QTE Event
+</button>
+
 <script>
 async function checkAdmin() {
   const pass = prompt("Enter admin password:");
@@ -55,6 +59,28 @@ async function approve(id) {
 async function reject(id) {
   await fetch("https://clear-condition.onrender.com/reject/" + id, { method: "POST" });
   load();
+}
+
+async function startQTE() {
+  try {
+    const res = await fetch("https://clear-condition.onrender.com/start-qte", {
+      method: "POST"
+    });
+
+    const text = await res.text();
+
+    if (!res.ok) {
+      alert("Failed: " + text);
+      return;
+    }
+
+    alert("⚡ QTE Started!");
+    console.log("QTE response:", text);
+
+  } catch (err) {
+    console.error(err);
+    alert("Error starting QTE");
+  }
 }
 
 (async () => {
