@@ -279,27 +279,23 @@ app.get("/leaderboard", (req, res) => {
 app.post("/admin/start-qte", (req, res) => {
   const { title, duration } = req.body;
 
-  const now = Date.now();
+  const startAt = Date.now();
+  const endsAt = startAt + duration * 1000;
 
-  qteActive = true; // QTE exists (but not active yet)
+  qteActive = true;
 
   qteData = {
     title,
-    startAt: now + 15000, // 🔥 ALWAYS 15 sec countdown
-    endsAt: null          // ❌ no auto end
+    startAt,
+    endsAt
   };
 
-  res.json({ success: true, qteData });
+  res.json({ success: true });
 });
 
 app.post("/admin/end-qte", (req, res) => {
   qteActive = false;
-
-  qteData = {
-    title: "",
-    startAt: 0,
-    endsAt: 0
-  };
+  qteData = { title: "", endsAt: 0 };
 
   res.json({ success: true });
 });
