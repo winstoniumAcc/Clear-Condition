@@ -446,10 +446,22 @@ async function updateDashboard() {
   document.getElementById("displayName").innerText = name;
   document.getElementById("displayGroup").innerText = group;
 
-  let res = await fetch("https://clear-condition.onrender.com/points");
-  let data = await res.json();
+  try {
 
-  document.getElementById("displayPoints").innerText = data[group] || "Failed to fetch (Refresh)";
+    let res = await fetch("https://clear-condition.onrender.com/points");
+
+    let data = await res.json();
+
+    let groupName = "Group " + group; // 🔥 IMPORTANT FIX
+
+    document.getElementById("displayPoints").innerText =
+      data[groupName] ?? 0;
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("displayPoints").innerText =
+      "Failed to fetch";
+  }
 }
 
 // ---------------- QR SCANNER ----------------
