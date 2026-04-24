@@ -294,7 +294,12 @@ app.post("/admin/start-qte", (req, res) => {
 
 app.post("/admin/end-qte", (req, res) => {
   qteActive = false;
-  qteData = { title: "", endsAt: 0 };
+
+  qteData = {
+    title: "",
+    startAt: 0,
+    endsAt: 0
+  };
 
   res.json({ success: true });
 });

@@ -884,7 +884,10 @@ function checkQTE() {
   fetch("https://clear-condition.onrender.com/qte-status")
     .then(res => res.json())
     .then(data => {
-      if (!data.active) return;
+     if (!data.active && qteActive) {
+      endQTE(); // force cleanup when server ends it
+      return;
+    }
 
       const qte = data.data;
       const now = Date.now();
@@ -938,22 +941,23 @@ function startCountdown(qte) {
   }, 250);
 }
 
-function startQTE(qte) {
-  if (qteActive) return;
+function endQTE() {
+  qteActive = false;
+  qteStartedThisRound = false;
 
-  qteActive = true;
-
+  clearInterval(qteInterval);
   clearInterval(qteCountdownInterval);
 
-  document.body.style.pointerEvents = "none";
+  qteInterval = null;
+  qteCountdownInterval = null;
 
-  showQTEToast(`🔥 QTE ACTIVE: ${qte.title}`);
+  document.body.style.pointerEvents = "auto";
 
-  qteInterval = setInterval(() => {
-    document.getElementById("qteTimer").innerText = "ACTIVE";
+  showQTEToast("✅ QTE ENDED");
 
-    document.getElementById("qteBar").style.width = "100%";
-  }, 1000);
+  const el = document.getElementById("qteToast");
+  const toast = bootstrap.Toast.getInstance(el);
+  if (toast) toast.hide();
 }
 
 function endQTE() {
