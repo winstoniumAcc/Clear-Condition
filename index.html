@@ -887,34 +887,22 @@ function checkQTE() {
       if (!data.active) return;
 
       const qte = data.data;
-      const now = Date.now();
 
-      // reset per new QTE cycle
-      if (!qteActive && !qteCountdownInterval && !qteInterval) {
-        qteStartedThisRound = false;
-      }
-
-      // 🔵 COUNTDOWN PHASE
-      if (now < qte.startAt) {
+      // 🔵 COUNTDOWN (always 15 sec fixed)
+      if (qte.state === "countdown") {
         startCountdown(qte);
         return;
       }
 
-      // 🔴 START QTE ONLY ONCE
-      if (
-        now >= qte.startAt &&
-        now <= qte.endsAt &&
-        !qteStartedThisRound
-      ) {
+      // 🔥 ACTIVE (no timer end anymore)
+      if (qte.state === "active") {
         startQTE(qte);
-        qteStartedThisRound = true;
         return;
       }
 
-      // ⚫ AUTO END
-      if (now > qte.endsAt) {
+      // ⛔ ENDED (admin controlled)
+      if (qte.state === "ended") {
         endQTE();
-        qteStartedThisRound = false;
       }
     });
 }
@@ -938,20 +926,27 @@ function showQTEToast(message) {
 function startCountdown(qte) {
   if (qteCountdownInterval) return;
 
+  let timeLeft = 15;
+
+  showQTEToast("⏳ QTE STARTING SOON");
+
   qteCountdownInterval = setInterval(() => {
-    const now = Date.now();
-    const timeLeft = Math.max(0, Math.ceil((qte.startAt - now) / 1000));
 
     showQTEToast(`⏳ STARTING IN ${timeLeft}s`);
 
-    document.getElementById("qteBar").style.width = "100%";
+    document.getElementById("qteBar").style.width =
+      (timeLeft / 15) * 100 + "%";
+
     document.getElementById("qteTimer").innerText = timeLeft + "s";
 
-    if (timeLeft <= 0) {
+    timeLeft--;
+
+    if (timeLeft < 0) {
       clearInterval(qteCountdownInterval);
       qteCountdownInterval = null;
     }
-  }, 250);
+
+  }, 1000);
 }
 
 function startQTE(qte) {
@@ -964,35 +959,15 @@ function startQTE(qte) {
 
   document.body.style.pointerEvents = "none";
 
-  const total = Math.ceil((qte.endsAt - qte.startAt) / 1000);
-
-  let remaining = total;
-
   document.getElementById("qteBar").style.width = "100%";
 
   showQTEToast(`🔥 QTE ACTIVE: ${qte.title}`);
 
-  qteInterval = setInterval(() => {
-
-    remaining--;
-
-    const percent = (remaining / total) * 100;
-
-    document.getElementById("qteBar").style.width = percent + "%";
-    document.getElementById("qteTimer").innerText = remaining + "s";
-
-    if (remaining <= 0) {
-      clearInterval(qteInterval);
-      endQTE();
-    }
-
-  }, 1000);
+  document.getElementById("qteTimer").innerText = "LIVE";
 }
 
 function endQTE() {
   qteActive = false;
-
-  clearInterval(qteInterval);
 
   document.body.style.pointerEvents = "auto";
 
@@ -1001,13 +976,8 @@ function endQTE() {
   setTimeout(() => {
     const el = document.getElementById("qteToast");
     const toast = bootstrap.Toast.getInstance(el);
-
     if (toast) toast.hide();
   }, 5000);
-
-  fetch("https://clear-condition.onrender.com/admin/end-qte", {
-    method: "POST"
-  });
 }
 
 setInterval(checkQTE, 250);

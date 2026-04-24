@@ -39,9 +39,13 @@ app.use(session({
 const usersFile = path.join(__dirname, "users.json");
 
 let qteActive = false;
-let qteData = {
-  title: "",
-  endsAt: 0
+let qte = {
+  active: false,
+  data: {
+    state: "ended", // "countdown" | "active" | "ended"
+    title: "Default QTE",
+    startTime: null
+  }
 };
 
 // create file if not exists
@@ -277,32 +281,28 @@ app.get("/leaderboard", (req, res) => {
 });
 
 app.post("/admin/start-qte", (req, res) => {
-  const { title, duration } = req.body;
 
-  const countdown = 15;
+  qte.active = true;
+  qte.data.state = "countdown";
+  qte.data.title = req.body.title || "QTE Event";
+  qte.data.startTime = Date.now();
 
-  const now = Date.now();
+  res.json({ success: true, message: "QTE countdown started (15s)" });
 
-  const startAt = now + countdown * 1000;
-  const endsAt = startAt + duration * 1000;
-
-  qteData = {
-    title,
-    startAt,
-    endsAt,
-    countdown
-  };
-
-  qteActive = true; // means system has scheduled QTE, NOT started yet
-
-  res.json({ success: true });
+  // 🔥 auto switch to active after 15s
+  setTimeout(() => {
+    if (qte.data.state === "countdown") {
+      qte.data.state = "active";
+    }
+  }, 15000);
 });
 
 app.post("/admin/end-qte", (req, res) => {
-  qteActive = false;
-  qteData = { title: "", endsAt: 0 };
 
-  res.json({ success: true });
+  qte.active = false;
+  qte.data.state = "ended";
+
+  res.json({ success: true, message: "QTE ended" });
 });
 
 app.get("/qte-status", (req, res) => {
