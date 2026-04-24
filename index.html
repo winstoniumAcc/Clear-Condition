@@ -941,23 +941,22 @@ function startCountdown(qte) {
   }, 250);
 }
 
-function endQTE() {
-  qteActive = false;
-  qteStartedThisRound = false;
+function startQTE(qte) {
+  if (qteActive) return;
 
-  clearInterval(qteInterval);
+  qteActive = true;
+
   clearInterval(qteCountdownInterval);
 
-  qteInterval = null;
-  qteCountdownInterval = null;
+  document.body.style.pointerEvents = "none";
 
-  document.body.style.pointerEvents = "auto";
+  showQTEToast(`🔥 QTE ACTIVE: ${qte.title}`);
 
-  showQTEToast("✅ QTE ENDED");
+  qteInterval = setInterval(() => {
+    document.getElementById("qteTimer").innerText = "ACTIVE";
 
-  const el = document.getElementById("qteToast");
-  const toast = bootstrap.Toast.getInstance(el);
-  if (toast) toast.hide();
+    document.getElementById("qteBar").style.width = "100%";
+  }, 1000);
 }
 
 function endQTE() {
