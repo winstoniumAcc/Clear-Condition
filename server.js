@@ -279,18 +279,21 @@ app.get("/leaderboard", (req, res) => {
 app.post("/admin/start-qte", (req, res) => {
   const { title, duration } = req.body;
 
-  const countdown = 15; // 🔥 15 seconds pre-start
+  const countdown = 15;
 
-  const startAt = Date.now() + countdown * 1000;
+  const now = Date.now();
 
-  qteActive = true;
+  const startAt = now + countdown * 1000;
+  const endsAt = startAt + duration * 1000;
 
   qteData = {
     title,
-    countdownStart: Date.now(),
     startAt,
-    endsAt: startAt + duration * 1000
+    endsAt,
+    countdown
   };
+
+  qteActive = true; // means system has scheduled QTE, NOT started yet
 
   res.json({ success: true });
 });

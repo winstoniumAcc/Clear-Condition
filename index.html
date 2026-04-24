@@ -888,19 +888,21 @@ function checkQTE() {
       const qte = data.data;
       const now = Date.now();
 
-      // 🔵 PHASE 1: COUNTDOWN
-      if (now < qte.startAt && !qteActive) {
+      // 🔵 COUNTDOWN PHASE
+      if (now < qte.startAt) {
         startCountdown(qte);
         return;
       }
 
-      // 🔴 PHASE 2: START QTE
-      if (
-        now >= qte.startAt &&
-        now <= qte.endsAt &&
-        !qteActive
-      ) {
+      // 🔴 ACTIVE PHASE
+      if (now >= qte.startAt && now <= qte.endsAt) {
         startQTE(qte);
+        return;
+      }
+
+      // ⚫ AUTO END
+      if (now > qte.endsAt) {
+        endQTE();
       }
     });
 }
@@ -922,23 +924,21 @@ function showQTEToast(message) {
 }
 
 function startCountdown(qte) {
-
-  clearInterval(qteCountdownInterval);
+  if (qteCountdownInterval) return;
 
   qteCountdownInterval = setInterval(() => {
-
     const now = Date.now();
     const timeLeft = Math.max(0, Math.ceil((qte.startAt - now) / 1000));
+
+    showQTEToast(`⏳ STARTING IN ${timeLeft}s`);
 
     document.getElementById("qteBar").style.width = "100%";
     document.getElementById("qteTimer").innerText = timeLeft + "s";
 
-    showQTEToast(`⏳ QTE STARTING IN ${timeLeft}s`);
-
     if (timeLeft <= 0) {
       clearInterval(qteCountdownInterval);
+      qteCountdownInterval = null;
     }
-
   }, 250);
 }
 
@@ -949,6 +949,8 @@ function startQTE(qte) {
   qteActive = true;
 
   clearInterval(qteCountdownInterval);
+
+  document.body.style.pointerEvents = "none";
 
   const total = Math.ceil((qte.endsAt - qte.startAt) / 1000);
 
@@ -980,15 +982,16 @@ function endQTE() {
 
   clearInterval(qteInterval);
 
-  // 🔥 HIDE TOAST
-  const el = document.getElementById("qteToast");
-  const toast = bootstrap.Toast.getInstance(el);
-
-  if (toast) {
-    toast.hide();
-  }
+  document.body.style.pointerEvents = "auto";
 
   showQTEToast("✅ QTE ENDED");
+
+  setTimeout(() => {
+    const el = document.getElementById("qteToast");
+    const toast = bootstrap.Toast.getInstance(el);
+
+    if (toast) toast.hide();
+  }, 5000);
 
   fetch("https://clear-condition.onrender.com/admin/end-qte", {
     method: "POST"
