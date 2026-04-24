@@ -875,33 +875,27 @@ function goDashboard() {
   show("playerHome");
 }
 
-let qteInterval = null;
 let qteCountdownInterval = null;
-
+let qteInterval = null;
 let qteActive = false;
-let qtePaused = false;
 
-let qteDuration = 0;
-let qteRemaining = 0;
+function checkQTE() {
+  fetch("https://clear-condition.onrender.com/qte-status")
+    .then(res => res.json())
+    .then(data => {
+      if (!data.active) return;
 
-async function checkQTE() {
-  try {
-    let res = await fetch("https://clear-condition.onrender.com/qte-status");
-    let data = await res.json();
+      const qte = data.data;
+      const now = Date.now();
 
-    if (!data.active) return;
+      if (now < qte.startAt && !qteActive) {
+        startCountdown(qte);
+      }
 
-    const qte = data.data;
-
-    const secondsUntilStart = Math.floor((qte.endsAt - Date.now()) / 1000);
-
-    if (secondsUntilStart > 0 && !qteActive) {
-      startQTECountdown(qte);
-    }
-
-  } catch (err) {
-    console.error(err);
-  }
+      if (now >= qte.startAt && !qteActive) {
+        startQTE(qte);
+      }
+    });
 }
 
 function showQTEToast(message) {
@@ -920,58 +914,56 @@ function showQTEToast(message) {
   toast.show();
 }
 
-function startQTECountdown(qte) {
-
-  let timeLeft = Math.floor((qte.endsAt - Date.now()) / 1000);
+function startCountdown(qte) {
 
   clearInterval(qteCountdownInterval);
 
+  const start = qte.startAt;
+
   qteCountdownInterval = setInterval(() => {
 
-    timeLeft--;
+    const now = Date.now();
+    const timeLeft = Math.max(0, Math.ceil((start - now) / 1000));
+
+    const total = Math.ceil((start - (start - 10000)) / 1000); 
+    // OR better: use fixed 10s countdown from server if you want
+
+    const progress = ((total - timeLeft) / total) * 100;
+
+    document.getElementById("qteBar").style.width = progress + "%";
+    document.getElementById("qteTimer").innerText = timeLeft + "s";
+
+    showQTEToast(`⚠️ QTE STARTING IN ${timeLeft}s`);
 
     if (timeLeft <= 0) {
       clearInterval(qteCountdownInterval);
-      startQTE(qte);
-      return;
     }
 
-    const percent = ((qteDuration - timeLeft) / qteDuration) * 100;
-
-    // show countdown + progress bar
-    document.getElementById("qteBar").style.width = percent + "%";
-
-    showQTEToast(`⚠️ QTE starts in ${timeLeft}s`);
-
-  }, 1000);
+  }, 250);
 }
 
 function startQTE(qte) {
 
   qteActive = true;
-  qtePaused = false;
+  clearInterval(qteCountdownInterval);
 
-  qteDuration = Math.floor((qte.endsAt - Date.now()) / 1000);
-  qteRemaining = qteDuration;
-
-  showQTEToast(`🔥 QTE ACTIVE: ${qte.title}`);
+  const total = Math.ceil((qte.endsAt - qte.startAt) / 1000);
+  let remaining = total;
 
   document.getElementById("qteBar").style.width = "100%";
 
-  clearInterval(qteInterval);
+  showQTEToast(`🔥 QTE ACTIVE: ${qte.title}`);
 
   qteInterval = setInterval(() => {
 
-    if (qtePaused) return;
+    remaining--;
 
-    qteRemaining--;
+    const progress = (remaining / total) * 100;
 
-    const percent = (qteRemaining / qteDuration) * 100;
+    document.getElementById("qteBar").style.width = progress + "%";
+    document.getElementById("qteTimer").innerText = remaining + "s";
 
-    document.getElementById("qteBar").style.width = percent + "%";
-    document.getElementById("qteTimer").innerText = qteRemaining + "s";
-
-    if (qteRemaining <= 0) {
+    if (remaining <= 0) {
       clearInterval(qteInterval);
       endQTE();
     }
@@ -980,15 +972,11 @@ function startQTE(qte) {
 }
 
 function endQTE() {
-
   qteActive = false;
 
   clearInterval(qteInterval);
-  clearInterval(qteCountdownInterval);
 
-  document.body.style.pointerEvents = "auto";
-
-  showQTEToast("✅ QTE ENDED - Resume Game");
+  showQTEToast("✅ QTE ENDED");
 
   fetch("https://clear-condition.onrender.com/admin/end-qte", {
     method: "POST"
