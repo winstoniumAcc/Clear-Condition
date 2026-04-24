@@ -262,9 +262,18 @@
 </div>
 
 <!-- NOTIFICATION TOAST -->
-<div id="qteToast" class="toast position-fixed top-0 end-0 m-3 text-bg-danger" role="alert">
-  <div class="toast-body">
-    ⚠️ QTE STARTING IN <span id="qteCountdown">0</span>s
+<div class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 9999">
+  <div id="gameToast" class="toast align-items-center text-bg-dark border-0" role="alert">
+
+    <div class="d-flex">
+      <div class="toast-body" id="toastText">
+        Notification
+      </div>
+
+      <button type="button" class="btn-close btn-close-white me-2 m-auto"
+        data-bs-dismiss="toast"></button>
+    </div>
+
   </div>
 </div>
 
@@ -863,47 +872,80 @@ function goDashboard() {
   show("playerHome");
 }
 
-let qteActive = false;
+let lastQTEState = false;
 
 async function checkQTE() {
   try {
-    let res = await fetch("https://clear-condition.onrender.com/qte");
-
-    if (!res.ok) {
-      console.log("QTE route not found:", res.status);
-      return;
-    }
-
+    let res = await fetch("https://clear-condition.onrender.com/qte-status");
     let data = await res.json();
 
-    console.log("QTE DATA:", data);
+    if (data.active && !lastQTEState) {
+      // NEW QTE started
+      startQTECountdown(data.data);
+    }
+
+    lastQTEState = data.active;
 
   } catch (err) {
-    console.log("QTE fetch failed:", err);
+    console.error("QTE fetch error:", err);
   }
 }
 
-function startQTECountdown(endTime) {
-  const toastEl = document.getElementById("qteToast");
-  const countdownEl = document.getElementById("qteCountdown");
+function showQTEToast(message) {
+  const el = document.getElementById("gameToast");
+  const text = document.getElementById("toastText");
 
-  let toast = new bootstrap.Toast(toastEl);
+  text.innerText = message;
+
+  const toast = new bootstrap.Toast(el, {
+    delay: 5000
+  });
+
   toast.show();
+}
 
-  let interval = setInterval(() => {
-    let timeLeft = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+function startQTECountdown(qte) {
 
-    countdownEl.innerText = timeLeft;
+  const interval = setInterval(() => {
+
+    const timeLeft = Math.max(0, Math.floor((qte.endsAt - Date.now()) / 1000));
 
     if (timeLeft <= 0) {
       clearInterval(interval);
-      toast.hide();
-      qteActive = false;
+      startQTE(qte.title);
+      return;
     }
+
+    showQTEToast(`⚠️ QTE STARTING IN ${timeLeft}s - ${qte.title}`);
+
   }, 1000);
 }
 
-setInterval(checkQTE, 2000);
+function startQTE(title) {
+
+  document.body.style.pointerEvents = "none";
+
+  showQTEToast(`🔥 QTE ACTIVE: ${title}`);
+
+  // example forced action
+  setTimeout(() => {
+    endQTE();
+  }, 15000);
+}
+
+function endQTE() {
+
+  document.body.style.pointerEvents = "auto";
+
+  showQTEToast("✅ QTE ENDED - Resume Game");
+
+  fetch("https://clear-condition.onrender.com/admin/end-qte", {
+    method: "POST"
+  });
+
+}
+
+setInterval(checkQTE, 1000);
 
 setInterval(loadLeaderboard, 3000);
 </script>

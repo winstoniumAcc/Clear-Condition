@@ -1,8 +1,18 @@
 <h2>Submissions</h2>
 <div id="list"></div>
 
-<button class="btn btn-danger w-100 mt-3" onclick="startQTE()">
-  ⚡ Start QTE Event
+<h3 class="mt-4">⚡ Start QTE Event</h3>
+
+<input id="qteTitle" class="form-control mb-2" placeholder="QTE Title (e.g. Freeze!)">
+
+<input id="qteDuration" type="number" class="form-control mb-2" placeholder="Duration (seconds)">
+
+<button class="btn btn-danger w-100" onclick="startQTEAdmin()">
+  🚀 Start QTE
+</button>
+
+<button class="btn btn-secondary w-100 mt-2" onclick="endQTEAdmin()">
+  🛑 End QTE
 </button>
 
 <script>
@@ -61,25 +71,49 @@ async function reject(id) {
   load();
 }
 
-async function startQTE() {
+async function startQTEAdmin() {
+
+  const title = document.getElementById("qteTitle").value || "Quick Event!";
+  const duration = parseInt(document.getElementById("qteDuration").value) || 10;
+
   try {
-    const res = await fetch("https://clear-condition.onrender.com/start-qte", {
-      method: "POST"
+    const res = await fetch("https://clear-condition.onrender.com/admin/start-qte", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        title: title,
+        duration: duration
+      })
     });
 
-    const text = await res.text();
+    const data = await res.json();
 
-    if (!res.ok) {
-      alert("Failed: " + text);
-      return;
+    if (data.success) {
+      alert("✅ QTE started!");
+    } else {
+      alert("❌ Failed to start QTE");
     }
-
-    alert("⚡ QTE Started!");
-    console.log("QTE response:", text);
 
   } catch (err) {
     console.error(err);
-    alert("Error starting QTE");
+    alert("⚠️ Server error");
+  }
+}
+
+async function endQTEAdmin() {
+
+  try {
+    await fetch("https://clear-condition.onrender.com/admin/end-qte", {
+      method: "POST"
+    });
+
+    alert("🛑 QTE ended");
+
+  } catch (err) {
+    console.error(err);
+    alert("⚠️ Error ending QTE");
   }
 }
 

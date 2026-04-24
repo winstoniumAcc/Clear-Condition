@@ -38,10 +38,10 @@ app.use(session({
 
 const usersFile = path.join(__dirname, "users.json");
 
-let qte = {
-  active: false,
-  action: null,
-  endTime: null
+let qteActive = false;
+let qteData = {
+  title: "",
+  endsAt: 0
 };
 
 // create file if not exists
@@ -276,24 +276,30 @@ app.get("/leaderboard", (req, res) => {
   res.json(sorted);
 });
 
-app.get("/qte", (req, res) => {
-  res.json({
-    active: false
-  });
-});
+app.post("/admin/start-qte", (req, res) => {
+  const { title, duration } = req.body;
 
-app.post("/start-qte", (req, res) => {
-  const keys = ["A", "S", "D", "F"];
-  const randomKey = keys[Math.floor(Math.random() * keys.length)];
-
-  currentQTE = {
-    active: true,
-    key: randomKey,
-    startTime: Date.now(),
-    duration: 5000
+  qteActive = true;
+  qteData = {
+    title,
+    endsAt: Date.now() + duration * 1000
   };
 
-  res.send("QTE started: " + randomKey);
+  res.json({ success: true });
+});
+
+app.post("/admin/end-qte", (req, res) => {
+  qteActive = false;
+  qteData = { title: "", endsAt: 0 };
+
+  res.json({ success: true });
+});
+
+app.get("/qte-status", (req, res) => {
+  res.json({
+    active: qteActive,
+    data: qteData
+  });
 });
 
 const PORT = process.env.PORT || 3000;
