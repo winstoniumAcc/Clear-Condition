@@ -898,7 +898,7 @@ function updateQTEUI(data) {
 
   // 🔴 COUNTDOWN
   if (data.countdown > 0) {
-    toastEl.classList.remove("text-bg-alert");
+    toastEl.classList.remove("text-bg-success");
     toastEl.classList.add("text-bg-info");
 
     title.innerText = `⚠️ ${data.title || "QTE Starting Soon"}`;
@@ -910,7 +910,7 @@ function updateQTEUI(data) {
   // 🟢 ACTIVE
   else if (data.active) {
     toastEl.classList.remove("text-bg-info");
-    toastEl.classList.add("text-bg-alert");
+    toastEl.classList.add("text-bg-success");
 
     title.innerText = `🔥 ${data.title || "Quick Time Event"}`;
     timer.innerText = "DO IT NOW!";
