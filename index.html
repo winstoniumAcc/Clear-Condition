@@ -248,6 +248,45 @@
   </div>
 </div>
 
+<div id="clue3" class="screen">
+  <div class="card-ui text-center">
+
+    <h4>📸 Task 3</h4>
+    <p>Take a picture of another group's leader clearly</p>
+
+    <!-- CAMERA PREVIEW -->
+    <div style="position: relative; width: 100%; border-radius: 12px; overflow: hidden; background: black;">
+      
+      <video id="photoPreview" autoplay playsinline style="
+        width: 100%;
+        height: 320px;
+        object-fit: cover;
+      "></video>
+
+    </div>
+
+    <!-- IMAGE PREVIEW -->
+    <img id="capturedImage" style="
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 12px;
+      display: none;
+    ">
+
+    <button class="btn btn-primary w-100 mt-2" onclick="startPhotoCamera()">Open Camera</button>
+    <button class="btn btn-warning w-100 mt-2" onclick="takePhoto()">Take / Retake</button>
+    <button class="btn btn-outline-light w-100 mt-2" onclick="flipPhotoCamera()">Flip Camera</button>
+    <button class="btn btn-success w-100 mt-2" onclick="uploadPhoto()">Upload</button>
+
+    <div style="position: relative; height: 15px;">
+      <p id="photoStatus" style="position:absolute; width:100%; margin:0;"></p>
+    </div>
+
+    <button class="btn btn-outline-light w-100 mt-3" onclick="goDashboard()">Back to Dashboard</button>
+
+  </div>
+</div>
+
 <!-- SCANNER -->
 <div id="scanner" class="screen">
   <div class="card-ui text-center">
@@ -336,6 +375,8 @@ function show(screen) {
   }
 
   if (screen !== "clue2") stopCamera();
+
+  if (screen !== "clue3") stopPhotoCamera();  // photo 🔥 important
 }
 
 // ---------------- START GAME ----------------
@@ -771,6 +812,96 @@ async function flipCamera() {
   }
 }
 
+let photoStream = null;
+let photoBlob = null;
+let photoFacingMode = "environment";
+
+// START CAMERA
+async function startPhotoCamera() {
+  if (photoStream) {
+    photoStream.getTracks().forEach(t => t.stop());
+  }
+
+  photoStream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: photoFacingMode },
+    audio: false
+  });
+
+  const video = document.getElementById("photoPreview");
+  video.srcObject = photoStream;
+
+  document.getElementById("capturedImage").style.display = "none";
+  photoBlob = null;
+}
+
+// TAKE PHOTO
+function takePhoto() {
+  const video = document.getElementById("photoPreview");
+
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0);
+
+  canvas.toBlob(blob => {
+    photoBlob = blob;
+
+    const img = document.getElementById("capturedImage");
+    img.src = URL.createObjectURL(blob);
+    img.style.display = "block";
+  }, "image/jpeg");
+}
+
+// FLIP CAMERA
+async function flipPhotoCamera() {
+  photoFacingMode = (photoFacingMode === "environment") ? "user" : "environment";
+  await startPhotoCamera();
+}
+
+// STOP CAMERA
+function stopPhotoCamera() {
+  if (photoStream) {
+    photoStream.getTracks().forEach(t => t.stop());
+    photoStream = null;
+  }
+}
+
+async function uploadPhoto() {
+  if (!photoBlob) {
+    alert("Take a picture first!");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("photo", photoBlob, "photo.jpg");
+  formData.append("task", "clue3"); // same task name
+
+  try {
+    document.getElementById("photoStatus").innerText = "Uploading...";
+
+    const res = await fetch("https://clear-condition.onrender.com/upload", {
+      method: "POST",
+      body: formData,
+      credentials: "include"
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      alert("Upload failed: " + text);
+      return;
+    }
+
+    show("pendingScreen");
+    startPolling();
+
+  } catch (err) {
+    console.error(err);
+    alert("Upload failed");
+  }
+}
+
 async function register() {
   const name = document.getElementById("name").value.trim();
   const password = document.getElementById("password").value;
@@ -913,7 +1044,7 @@ function updateQTEUI(data) {
     toastEl.classList.add("text-bg-success");
 
     title.innerText = `${data.title || "Quick Time Event"}`;
-    timer.innerText = "Be the first group to complete!";
+    timer.innerText = "Be the fastest group to earn more points!";
 
     qteToast.show();
   }
