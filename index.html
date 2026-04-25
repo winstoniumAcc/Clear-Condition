@@ -192,19 +192,6 @@
   </div>
 </div>
 
-<!-- SUCCESS 1 -->
-<div id="success1" class="screen">
-  <div class="card-ui text-center">
-    <h2>🎉 Correct!</h2>
-    <p>Scan the QR Code to unlock the next clue 📚</p>
-
-    <button class="btn btn-info w-100 mt-2" onclick="startScanner()">
-      📷 Scan QR Code
-    </button>
-     <button class="btn btn-outline-light w-100 mt-3" onclick="goDashboard()">Back to Dashboard</button>
-  </div>
-</div>
-
 <!-- TASK (REPLACES CLUE 2) -->
 <div id="recordTask" class="screen">
   <div class="card-ui text-center">
@@ -294,9 +281,6 @@
     <h4>📷 Scan QR Code</h4>
     <div id="reader" style="width:100%"></div>
 
-    <button class="btn btn-outline-light w-100 mt-3" onclick="stopScanner(); show('success1');">
-      Back
-    </button>
     <button class="btn btn-outline-light w-100 mt-3" onclick="goDashboard()">Back to Dashboard</button>
   </div>
 </div>
@@ -801,6 +785,7 @@ async function uploadVideo() {
      if (!res.ok) {
       const text = await res.text();
       alert("Upload failed: " + text);
+      document.getElementById("statusText").innerText = "";
       return;
     }
 
@@ -812,6 +797,8 @@ async function uploadVideo() {
   } catch (err) {
     console.error(err);
     alert("Upload failed: network error");
+
+    document.getElementById("statusText").innerText = "";
   }
 }
 
@@ -948,8 +935,10 @@ async function uploadPhoto() {
   }
 
   const formData = new FormData();
+  const task = currentPath[currentTaskIndex];
+
   formData.append("photo", photoBlob, "photo.jpg");
-  formData.append("task", "clue3"); // same task name
+  formData.append("task", task.text); // same task name
 
   try {
     document.getElementById("photoStatus").innerText = "Uploading...";
@@ -963,6 +952,7 @@ async function uploadPhoto() {
     if (!res.ok) {
       const text = await res.text();
       alert("Upload failed: " + text);
+      document.getElementById("statusText").innerText = "";
       return;
     }
 
@@ -972,6 +962,7 @@ async function uploadPhoto() {
   } catch (err) {
     console.error(err);
     alert("Upload failed");
+    document.getElementById("statusText").innerText = "";
   }
 }
 
