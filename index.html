@@ -1296,7 +1296,7 @@ function updateQTEUI(data) {
 
   // 🔴 COUNTDOWN
   if (data.countdown > 0) {
-    toastEl.classList.remove("text-bg-success");
+    toastEl.classList.remove("text-bg-success", "text-bg-danger");
     toastEl.classList.add("text-bg-primary");
 
     title.innerText = `${data.title || "QTE Starting Soon"}`;
@@ -1307,7 +1307,7 @@ function updateQTEUI(data) {
 
   // 🟢 ACTIVE
   else if (data.active) {
-    toastEl.classList.remove("text-bg-primary");
+    toastEl.classList.remove("text-bg-primary", "text-bg-danger");
     toastEl.classList.add("text-bg-success");
 
     title.innerText = `${data.title || "Quick Time Event"}`;
@@ -1332,6 +1332,23 @@ function updateQTEUI(data) {
 
 function hideQTE() {
   if (qteToast) qteToast.hide();
+}
+
+function showQTEEnded() {
+  const toastEl = document.getElementById("qteToast");
+
+  toastEl.classList.remove("text-bg-primary", "text-bg-success");
+  toastEl.classList.add("text-bg-danger");
+
+  document.getElementById("qteTitle").innerText = "Special Global Event Ended";
+  document.getElementById("qteTimer").innerText = "Treasure hunt resumed";
+
+  qteToast.show();
+
+  // auto hide after 3 seconds
+  setTimeout(() => {
+    qteToast.hide();
+  }, 3000);
 }
 
 function isLeader() {
@@ -1368,6 +1385,8 @@ setInterval(async () => {
 
   if (!data.active && qteActive && isLeader()) {
     qteActive = false;
+
+    showQTEEnded();
 
     // restore normal task
     if (originalTask) {
