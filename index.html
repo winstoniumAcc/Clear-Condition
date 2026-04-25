@@ -1147,7 +1147,7 @@ function logout() {
 
 async function addPoints(amount) {
 
-  let group = localStorage.getItem("group");
+  let group = "Group " + assignedGroup;
 
   await fetch("/add-points", {
     method: "POST",
