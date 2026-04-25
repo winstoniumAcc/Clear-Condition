@@ -1068,7 +1068,9 @@ async function login() {
 
     if (data.success) {
       currentUser = name;
+
       localStorage.setItem("user", name);
+      localStorage.setItem("password", password);
 
       alert("✅ Login successful!");
 
@@ -1131,6 +1133,45 @@ window.addEventListener("DOMContentLoaded", () => {
   qteToast = new bootstrap.Toast(toastEl, {
     autohide: false
   });
+});
+
+window.addEventListener("load", async () => {
+  const savedUser = localStorage.getItem("user");
+  const savedPass = localStorage.getItem("password");
+
+  if (!savedUser || !savedPass) {
+    show("home");
+    return;
+  }
+
+  // try auto-login
+  try {
+    const res = await fetch("https://clear-condition.onrender.com/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        name: savedUser,
+        password: savedPass
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      currentUser = savedUser;
+
+      updateDashboard();
+      show("playerHome");
+    } else {
+      localStorage.clear();
+      show("home");
+    }
+
+  } catch (err) {
+    console.error(err);
+    show("home");
+  }
 });
 
 function updateQTEUI(data) {
