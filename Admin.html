@@ -66,8 +66,8 @@ async function reject(id) {
 
 async function startQTE() {
   const title = document.getElementById("qteTitleInput").value || "Quick Time Event";
-  const countdown = parseInt(document.getElementById("qteCountdownInput").value) || 10;
-  const activeDuration = parseInt(document.getElementById("qteDurationInput").value) || 30;
+  const countdown = parseInt(document.getElementById("qteCountdownInput").value) || 0;
+  const activeDuration = parseInt(document.getElementById("qteDurationInput").value) || 0;
 
   await fetch("https://clear-condition.onrender.com/start-qte", {
     method: "POST",
