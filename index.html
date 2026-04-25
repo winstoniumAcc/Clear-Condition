@@ -1241,7 +1241,19 @@ window.addEventListener("load", async () => {
 
   } catch (err) {
     console.error(err);
-    show("home");
+    localStorage.clear();
+
+    // optional: clear session cookie on backend
+    fetch("https://clear-condition.onrender.com/logout", {
+      method: "POST",
+      credentials: "include"
+    }).catch(() => {});
+
+    // reset variables
+    currentUser = null;
+    assignedGroup = null;
+    currentPath = [];
+    currentTaskIndex = 0;
   }
 });
 
