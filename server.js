@@ -281,12 +281,22 @@ app.post("/admin-login", (req, res) => {
 app.get("/progress", (req, res) => {
   const group = req.query.group;
 
-   if (!group) {
+  if (!group) {
     return res.status(400).send("Missing group");
   }
 
+  const data = groupProgress[group];
+
+  if (!data) {
+    return res.json({
+      taskIndex: 0,
+      stage: "task"
+    });
+  }
+
   res.json({
-    taskIndex: groupProgress[group]
+    taskIndex: data.taskIndex,
+    stage: data.stage
   });
 });
 
