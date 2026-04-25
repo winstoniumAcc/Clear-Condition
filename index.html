@@ -502,8 +502,6 @@ function startGame() {
     return;
   }
 
-  assignedGroup = groupMap[name];
-
   show("wheelScreen");
   drawWheel();
 }
@@ -1102,6 +1100,9 @@ async function login() {
 
       localStorage.setItem("user", name);
       localStorage.setItem("password", password);
+
+      assignedGroup = groupMap[name];
+      localStorage.setItem("group", assignedGroup);
 
       alert("✅ Login successful!");
 
