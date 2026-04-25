@@ -161,6 +161,22 @@ app.post("/upload", upload.single("file"), (req, res) => {
     return res.status(401).send("Not logged in");
   }
 
+  submissions = submissions.filter(sub => {
+
+    if (sub.name === name) {
+
+      const filePath = path.join(__dirname, "videos", sub.file);
+
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath); // delete file
+      }
+
+      return false; // remove from array
+    }
+
+    return true;
+  });
+
   const attemptCount = submissions.filter(
     s => s.name === name && s.task === task
   ).length + 1;

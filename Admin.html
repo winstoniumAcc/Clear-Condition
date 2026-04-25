@@ -55,10 +55,24 @@ async function load() {
   container.innerHTML = "";
 
   data.forEach(item => {
+    let mediaHTML = "";
+
+    if (item.file.endsWith(".webm")) {
+      // 🎥 video
+      mediaHTML = `
+        <video src="https://clear-condition.onrender.com/videos/${item.file}" controls width="200"></video>
+      `;
+    } else {
+      // 📸 image
+      mediaHTML = `
+        <img src="https://clear-condition.onrender.com/videos/${item.file}" width="200" style="border-radius:10px;">
+      `;
+    }
+
     container.innerHTML += `
       <div style="margin-bottom:20px">
         <p>${item.name} - ${item.task} (${item.status})</p>
-        <video src="https://clear-condition.onrender.com/videos/${item.file}" controls width="200"></video><br>
+        ${mediaHTML}<br>
         <button onclick="approve('${item.id}')">Approve</button>
         <button onclick="reject('${item.id}')">Reject</button>
       </div>
