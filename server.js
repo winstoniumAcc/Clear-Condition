@@ -29,19 +29,19 @@ const paths = {
       title: "I have keys but no locks. What am I?",
       answer: "piano",
       nextLocationHint: "I have a lot of books.",
-      nextQR: "clue2"
+      nextQR: "CLUE2"
     },
     {
       type: "video",
       title: "Record yourself running around the field",
       nextLocationHint: "Near the basketball court stairs",
-      nextQR: "clue3"
+      nextQR: "CLUE2"
     },
     {
       type: "photo",
       title: "Take a picture of another group's leader",
       nextLocationHint: "Near canteen",
-      nextQR: "clue4"
+      nextQR: "CLUE2"
     }
   ],
 };
