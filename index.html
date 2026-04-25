@@ -728,11 +728,17 @@ function onScanSuccess(decodedText) {
 }
 
 // ---------------- STOP SCANNER ----------------
-function stopScanner() {
-  if (html5QrCode) {
-    html5QrCode.stop().then(() => html5QrCode.clear());
+async function stopScanner() {
+  try {
+    if (html5QrCode) {
+      await html5QrCode.stop();
+      await html5QrCode.clear();
+    }
+  } catch (err) {
+    console.log("Scanner already stopped:", err.message);
   }
 }
+
 let currentPath = [];
 let currentTaskIndex = 0;
 
