@@ -505,8 +505,6 @@ async function startGame() {
    if (localStorage.getItem("group")) {
     updateDashboard();
     show("playerHome");
-
-    await syncQTE();
     return;
   }
 
@@ -636,7 +634,7 @@ function shake(el) {
 
 async function updateDashboard() {
 
-  let name = localStorage.getItem("user");
+  let name = currentUser;
   let group = assignedGroup;
 
   document.getElementById("displayName").innerText = name;
