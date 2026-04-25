@@ -1137,6 +1137,9 @@ async function login() {
 }
 
 function logout() {
+  const confirmLogout = confirm("Are you sure you want to logout?");
+
+  if (!confirmLogout) return; // cancel if user clicks NO
   // clear all saved data
   localStorage.clear();
 
@@ -1361,14 +1364,14 @@ setInterval(async () => {
 
   updateQTEUI(data);
 
-  if (data.active && !qteActive && isLeader() && localStorage.getItem("group")) {
+  if (data.active && !qteActive && isLeader()) {
     qteActive = true;
 
     const taskRes = await fetch("https://clear-condition.onrender.com/qte-task");
     const qteTask = await taskRes.json();
 
     if (qteTask) {
-      if (document.getElementById("playerHome").classList.contains("active")) {
+      if (document.getElementById("playerHome").classList.contains("active") || document.getElementById("wheelScreen").classList.contains("active")) {
         originalTask = "Dashboard";
       } else {
         originalTask = currentPath[currentTaskIndex];
