@@ -193,7 +193,7 @@
     <button class="btn btn-success w-100 btn-game" onclick="checkAnswer()">
       Submit
     </button>
-    <button class="btn btn-outline-light w-100 mt-3" onclick="goDashboard()">Back to Dashboard</button>
+    <button class="btn btn-outline-light w-100 mt-3 goBackDash" onclick="goDashboard()">Back to Dashboard</button>
   </div>
 </div>
 
@@ -236,7 +236,7 @@
     <div style="position: relative; height: 15px;">
       <p id="videoStatus" style="position:absolute; width:100%; margin:0;"></p>
     </div>
-    <button class="btn btn-outline-light w-100 mt-3" onclick="goDashboard()">Back to Dashboard</button>
+    <button class="btn btn-outline-light w-100 mt-3 goBackDash" onclick="goDashboard()">Back to Dashboard</button>
   </div>
 </div>
 
@@ -274,7 +274,7 @@
       <p id="photoStatus" style="position:absolute; width:100%; margin:0;"></p>
     </div>
 
-    <button class="btn btn-outline-light w-100 mt-3" onclick="goDashboard()">Back to Dashboard</button>
+    <button class="btn btn-outline-light w-100 mt-3 goBackDash" onclick="goDashboard()">Back to Dashboard</button>
 
   </div>
 </div>
@@ -314,6 +314,7 @@ let html5QrCode;
 let currentFacingMode = "environment";
 let currentQteTask = null;
 let originalTask = null;
+let originalStage = null;
 let qteActive = false;
 
 const groupMap = {
@@ -377,14 +378,9 @@ async function loadPath() {
   const data = await res1.json();
 
   currentTaskIndex = data.taskIndex;
+  currentStage = data.stage;
 
-  if (data.stage === "task") {
-    loadTask();
-  }
-  if (data.stage === "scanner") {
-    const task = currentPath[currentTaskIndex];
-    goToScanner(task);
-  }
+  loadTask();
 }
 
 function loadTask() {
@@ -395,7 +391,8 @@ function loadTask() {
     return;
   }
 
-  // QUESTION
+  if (currentStage === "task") {
+     // QUESTION
   if (task.type === "question") {
     document.querySelector("#questionTask h4").innerText = task.title;
     document.querySelector("#questionTask p").innerText = task.text;
@@ -419,10 +416,16 @@ function loadTask() {
 
     show("photoTask");
   }
+  }
+
+  if (currentStage == "scanner") {
+    goToScanner(task);
+  }
 }
 
 function nextTask() {
   currentTaskIndex++;
+  currentStage = "task";
   loadTask();
 }
 
@@ -491,7 +494,7 @@ function show(screen) {
 }
 
 // ---------------- START GAME ----------------
-function startGame() {
+async function startGame() {
   let name = document.getElementById("name").value.trim();
 
   if (!groupMap[name]) {
@@ -502,6 +505,8 @@ function startGame() {
    if (localStorage.getItem("group")) {
     updateDashboard();
     show("playerHome");
+
+    await syncQTE();
     return;
   }
 
@@ -516,7 +521,8 @@ function checkAnswer() {
 
   if (ans === task.answer) {
     completeTask();
-    goToScanner(task); // 🔥 instantly scanner
+    currentStage = "scanner";
+    loadTask();
   } else {
     shake(document.getElementById("answer"));
   }
@@ -720,7 +726,7 @@ function onScanSuccess(decodedText) {
 
     } else {
       alert("Wrong QR Code!");
-      goToScanner(task);
+      loadTask();
     }
     })
     .finally(() => {
@@ -744,6 +750,7 @@ async function stopScanner() {
 
 let currentPath = [];
 let currentTaskIndex = 0;
+let currentStage = "task";
 
 let mediaRecorder;
 let recordedChunks = [];
@@ -927,7 +934,8 @@ function startPolling() {
         setTimeout(() => {
           alert("Task approved! 🎉");
           completeTask();
-          goToScanner(task); // 🔥 AFTER APPROVAL → scanner
+          currentStage = "scanner";
+          loadTask();
         }, 1000);
       }
 
@@ -1234,6 +1242,8 @@ window.addEventListener("load", async () => {
 
       updateDashboard();
       show("playerHome");
+
+      await syncQTE();
     } else {
       localStorage.clear();
       show("home");
@@ -1256,6 +1266,23 @@ window.addEventListener("load", async () => {
     currentTaskIndex = 0;
   }
 });
+
+async function syncQTE() {
+  try {
+    const res = await fetch("https://clear-condition.onrender.com/qte");
+    const data = await res.json();
+
+    updateQTEUI(data);
+
+    // 🔥 AUTO ENTER QTE SCREEN IF ACTIVE
+    if (data.active || data.countdown > 0) {
+      loadTask();
+    }
+
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 function updateQTEUI(data) {
   const toastEl = document.getElementById("qteToast");
@@ -1286,11 +1313,19 @@ function updateQTEUI(data) {
     timer.innerText = "Be the fastest group to earn more points!";
 
     qteToast.show();
+
+    document.querySelectorAll(".goBackDash").forEach(el => {
+    el.style.display = "none";
+  });
   }
 
   // ❌ HIDE
   else {
     qteToast.hide();
+    
+    document.querySelectorAll(".goBackDash").forEach(el => {
+    el.style.display = "none";
+  });
   }
 }
 
@@ -1315,10 +1350,16 @@ setInterval(async () => {
     const qteTask = await taskRes.json();
 
     if (qteTask) {
-      originalTask = currentPath[currentTaskIndex];
+      if (document.getElementById("playerHome").classList.contains("active")) {
+        originalTask = "Dashboard";
+      } else {
+        originalTask = currentPath[currentTaskIndex];
+      }
+      originalStage = currentStage;
 
       // 🔥 inject QTE as current task
       currentPath[currentTaskIndex] = qteTask;
+      currentStage = "task";
 
       loadTask(); // reuse SAME function
     }
@@ -1329,10 +1370,17 @@ setInterval(async () => {
 
     // restore normal task
     if (originalTask) {
-      currentPath[currentTaskIndex] = originalTask;
+      if (originalTask !== "Dashboard") {
+        currentPath[currentTaskIndex] = originalTask;
+      }
+      currentStage = originalStage;
     }
 
-    loadTask();
+    if (originalTask === "Dashboard") {
+      show("playerHome");
+    } else {
+       loadTask();
+    }
   }
 }, 1000);
 </script>
