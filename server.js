@@ -389,12 +389,14 @@ app.post("/start-qte", (req, res) => {
   qte.endsAt = null;
   qte.title = title || "Quick Time Event";
 
-  // 🔥 CREATE QTE TASK
+  // ✅ overwrite QTE task cleanly
   qteTask = task || {
-    type: "qte",
+    type: "question",
     title: "QTE Challenge",
     text: "Be the fastest team!",
-    reward: 20
+    answer: "",
+    nextLocationHint: "",
+    nextQR: ""
   };
 
   qteInterval = setInterval(() => {
@@ -410,8 +412,8 @@ app.post("/start-qte", (req, res) => {
 
         setTimeout(() => {
           qte.active = false;
-          qteTask = null; // 🔥 REMOVE AFTER END
           qte.endsAt = null;
+          qteTask = null; // ✅ cleanup
         }, activeDuration * 1000);
       }
     }
@@ -428,6 +430,9 @@ app.post("/end-qte", (req, res) => {
   qte.active = false;
   qte.countdown = 0;
   qte.endsAt = null;
+  qteTask = null;
+
+  if (qteInterval) clearInterval(qteInterval);
 
   res.json({ success: true });
 });

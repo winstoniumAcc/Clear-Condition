@@ -8,6 +8,17 @@
 <button onclick="startQTE()" class="btn btn-primary w-100">Start QTE</button>
 <button onclick="endQTE()" class="btn btn-danger w-100 mt-2">End QTE</button>
 
+<select id="qteType" class="form-control mb-2">
+  <option value="question">Question</option>
+  <option value="video">Video</option>
+  <option value="photo">Photo</option>
+</select>
+
+<input id="qteTitle" class="form-control mb-2" placeholder="Title">
+<textarea id="qteText" class="form-control mb-2" placeholder="Task Text"></textarea>
+
+<input id="qteAnswer" class="form-control mb-2" placeholder="Answer (only for question)">
+
 <script>
 async function checkAdmin() {
   const pass = prompt("Enter admin password:");
@@ -65,21 +76,39 @@ async function reject(id) {
 }
 
 async function startQTE() {
-  const title = document.getElementById("qteTitleInput").value || "Quick Time Event";
-  const countdown = parseInt(document.getElementById("qteCountdownInput").value) || 0;
-  const activeDuration = parseInt(document.getElementById("qteDurationInput").value) || 0;
+  const type = document.getElementById("qteType").value;
+  const title = document.getElementById("qteTitle").value;
+  const text = document.getElementById("qteText").value;
+  const answer = document.getElementById("qteAnswer").value;
+  const reward = Number(document.getElementById("qteReward").value);
+
+  const countdown = Number(document.getElementById("qteCountdown").value || 0);
+  const duration = Number(document.getElementById("qteDuration").value || 0);
+
+  let task = {
+    type,
+    title,
+    text,
+    reward
+  };
+
+  // 🔥 only question type needs answer
+  if (type === "question") {
+    task.answer = answer;
+  }
 
   await fetch("https://clear-condition.onrender.com/start-qte", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      title,
       countdown,
-      activeDuration
+      activeDuration: duration,
+      title,
+      task
     })
   });
+
+  alert("QTE Started!");
 }
 
 async function endQTE() {
