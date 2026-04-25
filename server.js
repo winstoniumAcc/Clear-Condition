@@ -49,7 +49,12 @@ const paths = {
   ],
 };
 
-const progress = {};
+let groupProgress = {
+  "1": 0,
+  "2": 0,
+  "3": 0,
+  "4": 0
+};
 
 const session = require("express-session");
 
@@ -162,6 +167,7 @@ app.post("/upload", upload.single("file"), (req, res) => {
   const entry = {
     id: Date.now() + Math.random(),
     name,
+    group,
     task,
     attempt: attemptCount,
     file: req.file.filename,
@@ -193,8 +199,15 @@ app.post("/approve/:id", (req, res) => {
     return res.status(404).send("Submission not found");
   }
 
+  const group = item.group;
+
+  groupProgress[group]++;
+
   item.status = "approved";
-  res.status(200).send("Approved");
+   return res.json({
+    success: true,
+    taskIndex: groupProgress[group]
+  });
 });
 
 app.post("/reject/:id", (req, res) => {
@@ -271,6 +284,25 @@ app.post("/admin-login", (req, res) => {
   } else {
     res.status(401).send("Wrong password");
   }
+});
+
+app.get("/progress", (req, res) => {
+  const group = req.query.group;
+
+  res.json({
+    taskIndex: groupProgress[group]
+  });
+});
+
+app.post("/progress/next", (req, res) => {
+  const { group } = req.body;
+
+  groupProgress[group]++;
+
+  res.json({
+    success: true,
+    taskIndex: groupProgress[group]
+  });
 });
 
 app.get("/points", (req, res) => {

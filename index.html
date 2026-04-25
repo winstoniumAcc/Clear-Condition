@@ -343,7 +343,10 @@ async function loadPath() {
   const res = await fetch("https://clear-condition.onrender.com/path?group=" + group);
   currentPath = await res.json();
 
-  currentTaskIndex = 0;
+  const res1 = await fetch(`https://clear-condition.onrender.com/progress?group=${group}`);
+  const data = await res1.json();
+
+  currentTaskIndex = data.taskIndex;
 
   loadTask();
 }
@@ -779,6 +782,7 @@ async function uploadVideo() {
 
   formData.append("file", videoBlob, "recording.webm");
   formData.append("task", task.text);
+  formData.append("group", group);
 
   try {
     document.getElementById("videoStatus").innerText = "Uploading...";
@@ -952,6 +956,7 @@ async function uploadPhoto() {
 
   formData.append("file", photoBlob, "photo.jpg");
   formData.append("task", task.text); // same task name
+  formData.append("group", group);
 
   try {
     document.getElementById("photoStatus").innerText = "Uploading...";
