@@ -387,7 +387,7 @@ function loadTask() {
   const task = currentPath[currentTaskIndex];
 
   if (!task) {
-    alert("🎉 All tasks completed!");
+    // alert("🎉 All tasks completed!");
     return;
   }
 
@@ -1321,8 +1321,6 @@ function updateQTEUI(data) {
 
   // ❌ HIDE
   else {
-    qteToast.hide();
-    
     document.querySelectorAll(".goBackDash").forEach(el => {
     el.style.display = "block";
   });
@@ -1397,7 +1395,7 @@ setInterval(async () => {
       currentStage = originalStage;
     }
 
-    if (originalTask === "Dashboard") {
+    if (originalTask === "Dashboard" || originalTask === null) {
       show("playerHome");
     } else {
        loadTask();
