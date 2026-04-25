@@ -135,7 +135,7 @@ const upload = multer({ storage });
 let submissions = [];
 
 // UPLOAD
-app.post("/upload", upload.single("video"), (req, res) => {
+app.post("/upload", upload.single("file"), (req, res) => {
 
   const name = req.session.user;
   if (!name) {

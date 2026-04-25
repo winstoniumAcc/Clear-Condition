@@ -764,7 +764,7 @@ async function uploadVideo() {
   const formData = new FormData();
   const task = currentPath[currentTaskIndex];
 
-  formData.append("video", videoBlob, "recording.webm");
+  formData.append("file", videoBlob, "recording.webm");
   formData.append("task", task.text);
 
   try {
@@ -937,7 +937,7 @@ async function uploadPhoto() {
   const formData = new FormData();
   const task = currentPath[currentTaskIndex];
 
-  formData.append("photo", photoBlob, "photo.jpg");
+  formData.append("file", photoBlob, "photo.jpg");
   formData.append("task", task.text); // same task name
 
   try {
