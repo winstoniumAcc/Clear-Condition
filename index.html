@@ -1415,7 +1415,7 @@ setInterval(async () => {
       currentStage = "task";
 
       const res1 = await fetch("https://clear-condition.onrender.com/qte-status?group=" + assignedGroup);
-      const data1 = await res.json();
+      const data1 = await res1.json();
 
       if (data1.status === "active") {
         show("qteWaiting");
