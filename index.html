@@ -619,8 +619,9 @@ function spinWheel() {
     canvas.style.transition = "none";
     canvas.style.transform = "rotate(0deg)";
     
-    localStorage.setItem("group", assignedGroup);
     alert("You got Group " + assignedGroup + " 🎉");
+    
+    localStorage.setItem("group", assignedGroup);
     updateDashboard();
     show("playerHome");
   }, 4200);
@@ -1343,7 +1344,7 @@ setInterval(async () => {
 
   updateQTEUI(data);
 
-  if (data.active && !qteActive && isLeader()) {
+  if (data.active && !qteActive && isLeader() && localStorage.getItem("group")) {
     qteActive = true;
 
     const taskRes = await fetch("https://clear-condition.onrender.com/qte-task");
