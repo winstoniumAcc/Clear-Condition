@@ -1238,6 +1238,7 @@ window.addEventListener("DOMContentLoaded", () => {
 window.addEventListener("load", async () => {
   const savedUser = localStorage.getItem("user");
   const savedPass = localStorage.getItem("password");
+  const savedGroup = localStorage.getItem("group");
 
   if (!savedUser || !savedPass) {
     show("home");
@@ -1260,6 +1261,7 @@ window.addEventListener("load", async () => {
 
     if (data.success) {
       currentUser = savedUser;
+      assignedGroup = savedGroup;
 
       updateDashboard();
       show("playerHome");
