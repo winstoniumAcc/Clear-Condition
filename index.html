@@ -100,6 +100,11 @@
   onclick="show('leaderboard'); loadLeaderboard();">
   🏆 Leaderboard
 </button>
+
+<button class="btn btn-danger w-100 mt-2"
+  onclick="logout()">
+  🚪 Logout
+</button>
   </div>
 </div>
 
@@ -308,13 +313,30 @@
 let html5QrCode;
 let currentFacingMode = "environment";
 
-const names = [
-  "Alvaro","Ben","Bryan","Cathleen","Cheryl",
-  "Christian","Cliff","Felix","Frederick","Gizelle",
-  "Grace","Gwillbert","Jasmine","Jeniffer","Jessica",
-  "Kathleen","Keiko","Sin","Viona","Priscilla",
-  "Victor","Wendellyne","Winston"
-];
+const groupMap = {
+  "Alvaro": 1,
+  "Cliff": 1,
+  "Sintha": 1,
+  "Viona": 1,
+
+  "Priscilla": 2,
+  "Jessica": 2,
+  "Christian": 2,
+  "Gwillbert": 2,
+
+  "Grace": 3,
+  "Jeniffer": 3,
+  "Cheryl": 3,
+  "Frederick": 3,
+
+  "Ben": 4,
+  "Victor": 4,
+  "Gizelle": 4,
+  "Jasmine": 4,
+  "Cathleen": 4
+};
+
+const leaders = ["Sintha", "Priscilla", "Frederick", "Ben"];
 
 let assignedGroup = null;
 let spinning = false;
@@ -337,6 +359,12 @@ function playTransition(callback) {
 }
 
 async function loadPath() {
+
+  if (!leaders.includes(currentUser)) {
+    alert("Only the group leader can start the hunt!");
+    return;
+  }
+
   const group = localStorage.getItem("group");
 
   const res = await fetch("https://clear-condition.onrender.com/path?group=" + group);
@@ -463,9 +491,7 @@ function show(screen) {
 function startGame() {
   let name = document.getElementById("name").value.trim();
 
-  let index = names.indexOf(name);
-
-  if (index === -1) {
+  if (!groupMap[name]) {
     alert("Name not in list!");
     return;
   }
@@ -476,12 +502,7 @@ function startGame() {
     return;
   }
 
-  if (!name) return;
-  // determine group (rigged)
-  if (index <= 4) assignedGroup = 1;
-  else if (index <= 9) assignedGroup = 2;
-  else if (index <= 14) assignedGroup = 3;
-  else assignedGroup = 4;
+  assignedGroup = groupMap[name];
 
   show("wheelScreen");
   drawWheel();
@@ -624,6 +645,14 @@ async function updateDashboard() {
     console.error(err);
     document.getElementById("displayPoints").innerText =
       "Failed to fetch";
+  }
+
+  const huntBtn = document.querySelector("#playerHome .btn-success");
+
+  if (leaders.includes(name)) {
+    huntBtn.style.display = "block";
+  } else {
+    huntBtn.style.display = "none";
   }
 }
 
@@ -1083,6 +1112,33 @@ async function login() {
     console.error(err);
     alert("⚠️ Server error during login");
   }
+}
+
+function logout() {
+  // clear all saved data
+  localStorage.clear();
+
+  // optional: clear session cookie on backend
+  fetch("https://clear-condition.onrender.com/logout", {
+    method: "POST",
+    credentials: "include"
+  }).catch(() => {});
+
+  // reset variables
+  currentUser = null;
+  assignedGroup = null;
+  currentPath = [];
+  currentTaskIndex = 0;
+
+  // stop anything running
+  stopScanner();
+  stopCamera();
+  stopPhotoCamera();
+
+  alert("Logged out!");
+
+  // go back to login screen
+  show("home");
 }
 
 async function addPoints(amount) {

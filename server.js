@@ -266,6 +266,12 @@ app.post("/login", async (req, res) => {
   res.json({ success: true });
 });
 
+app.post("/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.send("Logged out");
+  });
+});
+
 app.post("/admin-login", (req, res) => {
   console.log("ADMIN LOGIN BODY:", req.body);
 
