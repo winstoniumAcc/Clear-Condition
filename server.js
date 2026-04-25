@@ -23,7 +23,7 @@ app.use("/videos", express.static("videos"));
 app.use(express.static(path.join(__dirname)));
 
 const paths = {
-  group4: [
+  4: [
     {
       type: "question",
       title: "I have keys but no locks. What am I?",
