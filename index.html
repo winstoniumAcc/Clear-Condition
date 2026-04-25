@@ -309,6 +309,15 @@
 
 </div>
 
+<!-- event wait end -->
+<div id="qteWaiting" class="screen">
+  <div class="card-ui text-center">
+    <h4>⚡ Global Event Completed</h4>
+    <p>Waiting for event to finish...</p>
+    <div class="spinner-border text-light my-3"></div>
+  </div>
+</div>
+
 <script>
 let html5QrCode;
 let currentFacingMode = "environment";
@@ -518,6 +527,12 @@ function checkAnswer() {
   let ans = document.getElementById("answer").value.toLowerCase().trim();
 
   if (ans === task.answer) {
+    if (task.type === "qte") {
+      setQteStatus(assignedGroup, "active")
+      show("qteWaiting");
+      return;
+    }
+
     completeTask();
     currentStage = "scanner";
     loadTask();
@@ -932,6 +947,12 @@ function startPolling() {
 
         setTimeout(() => {
           alert("Task approved! 🎉");
+           if (task.type === "qte") {
+            setQteStatus(assignedGroup, "active")
+            show("qteWaiting");
+            return;
+          }
+
           completeTask();
           currentStage = "scanner";
           loadTask();
@@ -1348,6 +1369,19 @@ function showQTEEnded() {
   }, 5000);
 }
 
+async function setQteStatus(group, status) {
+  await fetch("https://clear-condition.onrender.com/qte-status/set", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      group,
+      status
+    })
+  });
+}
+
 function isLeader() {
   return leaders.includes(currentUser);
 }
@@ -1378,7 +1412,14 @@ setInterval(async () => {
       currentPath[currentTaskIndex] = qteTask;
       currentStage = "task";
 
-      loadTask(); // reuse SAME function
+      const res1 = await fetch("https://clear-condition.onrender.com/qte-status?group=" + assignedGroup);
+      const data1 = await res.json();
+
+      if (data1.status === "active") {
+        show("qteWaiting");
+      } else {
+        loadTask(); // reuse SAME function
+      }
     }
   }
 

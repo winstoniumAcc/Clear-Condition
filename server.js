@@ -76,10 +76,17 @@ let qte = {
   active: false,
   countdown: 0,
   endsAt: null,
-  title: "Quick Time Event"
+  title: "Quick Time Event",
+  type: "qte"
 };
 let qteInterval = null;
 let qteTask = null;
+let qteStatus = {
+  "1": "inactive",
+  "2": "inactive",
+  "3": "inactive",
+  "4": "inactive"
+};
 
 // create file if not exists
 if (!fs.existsSync(usersFile)) {
@@ -404,6 +411,7 @@ app.post("/start-qte", (req, res) => {
   qte.countdown = countdown;
   qte.endsAt = null;
   qte.title = title || "Quick Time Event";
+  qte.type = "qte";
 
   // ✅ overwrite QTE task cleanly
   qteTask = task || {
@@ -411,9 +419,11 @@ app.post("/start-qte", (req, res) => {
     title: "QTE Challenge",
     text: "Be the fastest team!",
     answer: "",
-    nextLocationHint: "",
-    nextQR: ""
   };
+
+  Object.keys(qteStatus).forEach(g => {
+    qteStatus[g] = "inactive";
+  });
 
   qteInterval = setInterval(() => {
     qte.countdown--;
@@ -438,8 +448,36 @@ app.post("/start-qte", (req, res) => {
   res.json({ success: true });
 });
 
+app.post("/qte-status/set", (req, res) => {
+  const { group, status } = req.body;
+
+  if (!group || !status) {
+    return res.status(400).send("Missing data");
+  }
+
+  if (!qteStatus[group]) {
+    return res.status(400).send("Invalid group");
+  }
+
+  qteStatus[group] = status;
+
+  res.json({
+    success: true,
+    group,
+    status
+  });
+});
+
 app.get("/qte-task", (req, res) => {
   res.json(qteTask);
+});
+
+app.get("/qte-status", (req, res) => {
+  const group = req.query.group;
+
+  res.json({
+    status: qteStatus[group] || "inactive"
+  });
 });
 
 app.post("/end-qte", (req, res) => {
