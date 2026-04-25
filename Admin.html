@@ -18,6 +18,7 @@
 <textarea id="qteText" class="form-control mb-2" placeholder="Task Text"></textarea>
 
 <input id="qteAnswer" class="form-control mb-2" placeholder="Answer (only for question)">
+<input id="qteReward" class="form-control mb-2" placeholder="Reward points">
 
 <script>
 async function checkAdmin() {
@@ -80,7 +81,7 @@ async function startQTE() {
   const title = document.getElementById("qteTitle").value;
   const text = document.getElementById("qteText").value;
   const answer = document.getElementById("qteAnswer").value;
-  const reward = Number(document.getElementById("qteReward").value);
+  const reward = Number(document.getElementById("qteReward").value) || 0;
 
   const countdown = Number(document.getElementById("qteCountdown").value || 0);
   const duration = Number(document.getElementById("qteDuration").value || 0);
