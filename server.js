@@ -41,7 +41,8 @@ const usersFile = path.join(__dirname, "users.json");
 let qte = {
   active: false,
   countdown: 0,
-  endsAt: null
+  endsAt: null,
+  title: "Quick Time Event"
 };
 let qteInterval = null;
 
@@ -278,21 +279,24 @@ app.get("/leaderboard", (req, res) => {
 });
 
 app.post("/start-qte", (req, res) => {
-  const { duration, activeDuration } = req.body;
+  const { countdown, activeDuration, title } = req.body;
 
-  if (typeof duration !== "number") {
-    return res.status(400).send("Invalid duration");
+  if (typeof countdown !== "number") {
+    return res.status(400).send("Invalid countdown");
   }
 
-  qte.active = false;
-  qte.countdown = duration;
+  if (qteInterval) clearInterval(qteInterval);
 
-  // countdown timer
-  const countdownInterval = setInterval(() => {
+  qte.active = false;
+  qte.countdown = countdown;
+  qte.endsAt = null;
+  qte.title = title || "Quick Time Event";
+
+  qteInterval = setInterval(() => {
     qte.countdown--;
 
     if (qte.countdown <= 0) {
-      clearInterval(countdownInterval);
+      clearInterval(qteInterval);
 
       qte.active = true;
 

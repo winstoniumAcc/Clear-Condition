@@ -882,7 +882,7 @@ function updateQTEUI(data) {
     box.classList.remove("alert-success");
     box.classList.add("alert-danger");
 
-    title.innerText = "⚠️ QTE Starting Soon!";
+    title.innerText = `⚠️ ${data.title} starting soon`;
     timer.innerText = `Starting in ${data.countdown}s...`;
   }
 
@@ -892,7 +892,7 @@ function updateQTEUI(data) {
     box.classList.remove("alert-danger");
     box.classList.add("alert-success");
 
-    title.innerText = "🔥 QUICK TIME EVENT!";
+    title.innerText = `🔥 ${data.title}`;
     timer.innerText = "DO THE TASK NOW!";
   }
 
