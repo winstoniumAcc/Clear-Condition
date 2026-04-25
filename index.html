@@ -830,9 +830,9 @@ function startPolling() {
 
     const task = currentPath[currentTaskIndex];
 
-const userSubs = data
-  .filter(s => s.name === currentUser && s.task === task.id)
-  .sort((a, b) => b.attempt - a.attempt);
+    console.log("TASK:", task.id);
+
+    const userSubs = data.filter(s => s.name === currentUser && s.task === task.id).sort((a, b) => b.attempt - a.attempt);
 
   console.log("USER SUBMISSIONS:", userSubs);
 
