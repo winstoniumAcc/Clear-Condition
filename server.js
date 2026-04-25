@@ -167,7 +167,6 @@ app.post("/upload", upload.single("file"), (req, res) => {
   const entry = {
     id: Date.now() + Math.random(),
     name,
-    group,
     task,
     attempt: attemptCount,
     file: req.file.filename,
@@ -199,15 +198,8 @@ app.post("/approve/:id", (req, res) => {
     return res.status(404).send("Submission not found");
   }
 
-  const group = item.group;
-
-  groupProgress[group]++;
-
   item.status = "approved";
-   return res.json({
-    success: true,
-    taskIndex: groupProgress[group]
-  });
+  res.status(200).send("Approved");
 });
 
 app.post("/reject/:id", (req, res) => {
@@ -288,6 +280,10 @@ app.post("/admin-login", (req, res) => {
 
 app.get("/progress", (req, res) => {
   const group = req.query.group;
+
+   if (!group) {
+    return res.status(400).send("Missing group");
+  }
 
   res.json({
     taskIndex: groupProgress[group]

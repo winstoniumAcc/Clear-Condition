@@ -305,7 +305,6 @@
 </div>
 
 <script>
-let currentClue = 1;
 let html5QrCode;
 let currentFacingMode = "environment";
 
@@ -388,6 +387,18 @@ function loadTask() {
 function nextTask() {
   currentTaskIndex++;
   loadTask();
+}
+
+async function completeTask() {
+  const group = localStorage.getItem("group");
+
+  const res = await fetch("https://clear-condition.onrender.com/progress/next", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ group })
+  });
 }
 
 // ---------------- SCREEN ----------------
@@ -646,7 +657,6 @@ function onScanSuccess(decodedText) {
     .then(() => html5QrCode.clear())
     .then(() => {
       if (decodedText === expectedQR) {
-      currentClue++;
 
       playTransition(() => {
         nextTask(); // ✅ FIXED
@@ -654,7 +664,7 @@ function onScanSuccess(decodedText) {
 
     } else {
       alert("Wrong QR Code!");
-      show("success" + currentClue);
+      goToScanner(task);
     }
     })
     .finally(() => {
