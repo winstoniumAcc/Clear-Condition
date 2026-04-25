@@ -312,6 +312,9 @@
 <script>
 let html5QrCode;
 let currentFacingMode = "environment";
+let currentQteTask = null;
+let originalTask = null;
+let qteActive = false;
 
 const groupMap = {
   "Alvaro": 1,
@@ -1283,14 +1286,41 @@ function hideQTE() {
   if (qteToast) qteToast.hide();
 }
 
-setInterval(async () => {
-  try {
-    const res = await fetch("https://clear-condition.onrender.com/qte");
-    const data = await res.json();
+function isLeader() {
+  return leaders.includes(currentUser);
+}
 
-    updateQTEUI(data);
-  } catch (err) {
-    console.error(err);
+setInterval(async () => {
+  const res = await fetch("https://clear-condition.onrender.com/qte");
+  const data = await res.json();
+
+  updateQTEUI(data);
+
+  if (data.active && !qteActive && isLeader()) {
+    qteActive = true;
+
+    const taskRes = await fetch("https://clear-condition.onrender.com/qte-task");
+    const qteTask = await taskRes.json();
+
+    if (qteTask) {
+      originalTask = currentPath[currentTaskIndex];
+
+      // 🔥 inject QTE as current task
+      currentPath[currentTaskIndex] = qteTask;
+
+      loadTask(); // reuse SAME function
+    }
+  }
+
+  if (!data.active && qteActive && isLeader()) {
+    qteActive = false;
+
+    // restore normal task
+    if (originalTask) {
+      currentPath[currentTaskIndex] = originalTask;
+    }
+
+    loadTask();
   }
 }, 1000);
 </script>

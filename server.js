@@ -79,6 +79,7 @@ let qte = {
   title: "Quick Time Event"
 };
 let qteInterval = null;
+let qteTask = null;
 
 // create file if not exists
 if (!fs.existsSync(usersFile)) {
@@ -375,7 +376,7 @@ app.get("/leaderboard", (req, res) => {
 });
 
 app.post("/start-qte", (req, res) => {
-  const { countdown, activeDuration, title } = req.body;
+  const { countdown, activeDuration, title, task } = req.body;
 
   if (typeof countdown !== "number") {
     return res.status(400).send("Invalid countdown");
@@ -387,6 +388,14 @@ app.post("/start-qte", (req, res) => {
   qte.countdown = countdown;
   qte.endsAt = null;
   qte.title = title || "Quick Time Event";
+
+  // 🔥 CREATE QTE TASK
+  qteTask = task || {
+    type: "qte",
+    title: "QTE Challenge",
+    text: "Be the fastest team!",
+    reward: 20
+  };
 
   qteInterval = setInterval(() => {
     qte.countdown--;
@@ -401,6 +410,7 @@ app.post("/start-qte", (req, res) => {
 
         setTimeout(() => {
           qte.active = false;
+          qteTask = null; // 🔥 REMOVE AFTER END
           qte.endsAt = null;
         }, activeDuration * 1000);
       }
@@ -408,6 +418,10 @@ app.post("/start-qte", (req, res) => {
   }, 1000);
 
   res.json({ success: true });
+});
+
+app.get("/qte-task", (req, res) => {
+  res.json(qteTask);
 });
 
 app.post("/end-qte", (req, res) => {
