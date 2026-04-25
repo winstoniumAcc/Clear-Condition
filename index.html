@@ -263,21 +263,11 @@
 </div>
 
 <!-- NOTIFICATION TOAST -->
-<div class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index:9999">
-  <div id="qteToast" class="toast text-bg-dark border-0" data-bs-autohide="false">
-    
-    <div class="toast-body">
-      <div id="qteText">QTE</div>
-
-      <!-- progress bar -->
-      <div class="progress mt-2" style="height:6px;">
-        <div id="qteBar" class="progress-bar bg-danger"></div>
-      </div>
-
-      <small id="qteTimer"></small>
-    </div>
-
-  </div>
+<div id="qteAlert" class="alert alert-danger text-center position-fixed top-0 start-50 translate-middle-x mt-3 shadow"
+     style="display:none; z-index:9999; min-width:300px;">
+  
+  <h4 id="qteTitle" class="alert-heading">⚠️ QTE Incoming!</h4>
+  <p id="qteTimer" class="mb-0"></p>
 </div>
 
 <script>
@@ -875,132 +865,53 @@ function goDashboard() {
   show("playerHome");
 }
 
-let qteCountdownInterval = null;
-let qteInterval = null;
-let qteActive = false;
+let lastQTEState = "";
 
-function checkQTE() {
-  fetch("https://clear-condition.onrender.com/qte-status")
-    .then(res => res.json())
-    .then(data => {
-      if (!data.active) return;
+function updateQTEUI(data) {
+  const box = document.getElementById("qteAlert");
+  const title = document.getElementById("qteTitle");
+  const timer = document.getElementById("qteTimer");
 
-      const qte = data.data;
-      const now = Date.now();
+  const stateString = JSON.stringify(data);
+  if (stateString === lastQTEState) return;
+  lastQTEState = stateString;
 
-      // 🔵 COUNTDOWN PHASE
-      if (now < qte.startAt) {
-        startCountdown(qte);
-        return;
-      }
+  // 🔴 COUNTDOWN
+  if (data.countdown > 0) {
+    box.style.display = "block";
+    box.classList.remove("alert-success");
+    box.classList.add("alert-danger");
 
-      // 🔴 ACTIVE PHASE
-      if (now >= qte.startAt && now <= qte.endsAt) {
-        startQTE(qte);
-        return;
-      }
-
-      // ⚫ AUTO END
-      if (now > qte.endsAt) {
-        endQTE();
-      }
-    });
-}
-
-function showQTEToast(message) {
-  const el = document.getElementById("qteToast");
-  const text = document.getElementById("qteText");
-
-  text.innerText = message;
-
-  // SAFE: reuse existing instance
-  let toast = bootstrap.Toast.getInstance(el);
-
-  if (!toast) {
-    toast = new bootstrap.Toast(el, { autohide: false });
+    title.innerText = "⚠️ QTE Starting Soon!";
+    timer.innerText = `Starting in ${data.countdown}s...`;
   }
 
-  toast.show();
+  // 🟢 ACTIVE
+  else if (data.active) {
+    box.style.display = "block";
+    box.classList.remove("alert-danger");
+    box.classList.add("alert-success");
+
+    title.innerText = "🔥 QUICK TIME EVENT!";
+    timer.innerText = "DO THE TASK NOW!";
+  }
+
+  // ❌ HIDDEN
+  else {
+    box.style.display = "none";
+  }
 }
 
-function startCountdown(qte) {
-  if (qteCountdownInterval) return;
+setInterval(async () => {
+  try {
+    const res = await fetch("https://clear-condition.onrender.com/qte");
+    const data = await res.json();
 
-  qteCountdownInterval = setInterval(() => {
-    const now = Date.now();
-    const timeLeft = Math.max(0, Math.ceil((qte.startAt - now) / 1000));
-
-    showQTEToast(`⏳ STARTING IN ${timeLeft}s`);
-
-    document.getElementById("qteBar").style.width = "100%";
-    document.getElementById("qteTimer").innerText = timeLeft + "s";
-
-    if (timeLeft <= 0) {
-      clearInterval(qteCountdownInterval);
-      qteCountdownInterval = null;
-    }
-  }, 250);
-}
-
-function startQTE(qte) {
-
-  if (qteActive) return;
-
-  qteActive = true;
-
-  clearInterval(qteCountdownInterval);
-
-  document.body.style.pointerEvents = "none";
-
-  const total = Math.ceil((qte.endsAt - qte.startAt) / 1000);
-
-  let remaining = total;
-
-  document.getElementById("qteBar").style.width = "100%";
-
-  showQTEToast(`🔥 QTE ACTIVE: ${qte.title}`);
-
-  qteInterval = setInterval(() => {
-
-    remaining--;
-
-    const percent = (remaining / total) * 100;
-
-    document.getElementById("qteBar").style.width = percent + "%";
-    document.getElementById("qteTimer").innerText = remaining + "s";
-
-    if (remaining <= 0) {
-      clearInterval(qteInterval);
-      endQTE();
-    }
-
-  }, 1000);
-}
-
-function endQTE() {
-  qteActive = false;
-
-  clearInterval(qteInterval);
-
-  document.body.style.pointerEvents = "auto";
-
-  showQTEToast("✅ QTE ENDED");
-
-  setTimeout(() => {
-    const el = document.getElementById("qteToast");
-    const toast = bootstrap.Toast.getInstance(el);
-
-    if (toast) toast.hide();
-  }, 5000);
-
-  fetch("https://clear-condition.onrender.com/admin/end-qte", {
-    method: "POST"
-  });
-}
-
-setInterval(checkQTE, 1000);
-
-setInterval(loadLeaderboard, 3000);
+    updateQTEUI(data);
+  } catch (err) {
+    console.error("QTE fetch error:", err);
+  }
+}, 1000);
 </script>
 
 </body>

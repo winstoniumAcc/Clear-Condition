@@ -38,11 +38,12 @@ app.use(session({
 
 const usersFile = path.join(__dirname, "users.json");
 
-let qteActive = false;
-let qteData = {
-  title: "",
-  endsAt: 0
+let qte = {
+  active: false,
+  countdown: 0,
+  endsAt: null
 };
+let qteInterval = null;
 
 // create file if not exists
 if (!fs.existsSync(usersFile)) {
@@ -276,35 +277,49 @@ app.get("/leaderboard", (req, res) => {
   res.json(sorted);
 });
 
-app.post("/admin/start-qte", (req, res) => {
-  const { title, duration } = req.body;
+app.post("/start-qte", (req, res) => {
+  const { duration, activeDuration } = req.body;
 
-  const startAt = Date.now();
-  const endsAt = startAt + duration * 1000;
+  if (typeof duration !== "number") {
+    return res.status(400).send("Invalid duration");
+  }
 
-  qteActive = true;
+  qte.active = false;
+  qte.countdown = duration;
 
-  qteData = {
-    title,
-    startAt,
-    endsAt
-  };
+  // countdown timer
+  const countdownInterval = setInterval(() => {
+    qte.countdown--;
+
+    if (qte.countdown <= 0) {
+      clearInterval(countdownInterval);
+
+      qte.active = true;
+
+      if (activeDuration) {
+        qte.endsAt = Date.now() + activeDuration * 1000;
+
+        setTimeout(() => {
+          qte.active = false;
+          qte.endsAt = null;
+        }, activeDuration * 1000);
+      }
+    }
+  }, 1000);
 
   res.json({ success: true });
 });
 
-app.post("/admin/end-qte", (req, res) => {
-  qteActive = false;
-  qteData = { title: "", endsAt: 0 };
+app.post("/end-qte", (req, res) => {
+  qte.active = false;
+  qte.countdown = 0;
+  qte.endsAt = null;
 
   res.json({ success: true });
 });
 
-app.get("/qte-status", (req, res) => {
-  res.json({
-    active: qteActive,
-    data: qteData
-  });
+app.get("/qte", (req, res) => {
+  res.json(qte);
 });
 
 const PORT = process.env.PORT || 3000;
