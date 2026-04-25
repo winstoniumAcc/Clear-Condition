@@ -50,10 +50,10 @@ const paths = {
 };
 
 let groupProgress = {
-  "1": 0,
-  "2": 0,
-  "3": 0,
-  "4": 0
+  "1": { taskIndex: 0, stage: "task" },
+  "2": { taskIndex: 0, stage: "task" },
+  "3": { taskIndex: 0, stage: "task" },
+  "4": { taskIndex: 0, stage: "task" }
 };
 
 const session = require("express-session");
@@ -290,14 +290,34 @@ app.get("/progress", (req, res) => {
   });
 });
 
-app.post("/progress/next", (req, res) => {
+app.post("/progress/complete-task", (req, res) => {
   const { group } = req.body;
 
-  groupProgress[group]++;
+  const prog = groupProgress[group];
+  if (!prog) return res.status(400).send("Invalid group");
+
+  prog.stage = "scanner";
 
   res.json({
     success: true,
-    taskIndex: groupProgress[group]
+    taskIndex: prog.taskIndex,
+    stage: prog.stage
+  });
+});
+
+app.post("/progress/complete-scanner", (req, res) => {
+  const { group } = req.body;
+
+  const prog = groupProgress[group];
+  if (!prog) return res.status(400).send("Invalid group");
+
+  prog.taskIndex++;
+  prog.stage = "task";
+
+  res.json({
+    success: true,
+    taskIndex: prog.taskIndex,
+    stage: prog.stage
   });
 });
 

@@ -347,7 +347,13 @@ async function loadPath() {
 
   currentTaskIndex = data.taskIndex;
 
-  loadTask();
+  if (data.stage === "task") {
+    loadTask();
+  }
+  if (data.stage === "scanner") {
+    const task = currentPath[currentTaskIndex];
+    goToScanner(task);
+  }
 }
 
 function loadTask() {
@@ -392,7 +398,19 @@ function nextTask() {
 async function completeTask() {
   const group = localStorage.getItem("group");
 
-  const res = await fetch("https://clear-condition.onrender.com/progress/next", {
+  const res = await fetch("https://clear-condition.onrender.com/progress/complete-task", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ group })
+  });
+}
+
+async function completeScan() {
+  const group = localStorage.getItem("group");
+
+  const res = await fetch("https://clear-condition.onrender.com/progress/complete-scanner", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -660,6 +678,7 @@ function onScanSuccess(decodedText) {
       if (decodedText === expectedQR) {
 
       playTransition(() => {
+        completeScan();
         nextTask(); // ✅ FIXED
       });
 
@@ -790,6 +809,7 @@ async function uploadVideo() {
 
   const formData = new FormData();
   const task = currentPath[currentTaskIndex];
+  const group = localStorage.getItem("group");
 
   formData.append("file", videoBlob, "recording.webm");
   formData.append("task", task.text);
@@ -965,6 +985,7 @@ async function uploadPhoto() {
 
   const formData = new FormData();
   const task = currentPath[currentTaskIndex];
+  const group = localStorage.getItem("group");
 
   formData.append("file", photoBlob, "photo.jpg");
   formData.append("task", task.text); // same task name
