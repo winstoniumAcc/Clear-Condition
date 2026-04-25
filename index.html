@@ -265,7 +265,7 @@
 <!-- NOTIFICATION TOAST -->
 <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index:9999">
 
-  <div id="qteToast" class="toast text-bg-danger border-0" role="alert">
+  <div id="qteToast" class="toast text-bg-info border-0" role="alert">
     
     <div class="d-flex">
       <div class="toast-body text-center w-100">
@@ -899,7 +899,7 @@ function updateQTEUI(data) {
   // 🔴 COUNTDOWN
   if (data.countdown > 0) {
     toastEl.classList.remove("text-bg-alert");
-    toastEl.classList.add("text-bg-primary");
+    toastEl.classList.add("text-bg-info");
 
     title.innerText = `⚠️ ${data.title || "QTE Starting Soon"}`;
     timer.innerText = `Starting in ${data.countdown}s...`;
@@ -909,7 +909,7 @@ function updateQTEUI(data) {
 
   // 🟢 ACTIVE
   else if (data.active) {
-    toastEl.classList.remove("text-bg-primary");
+    toastEl.classList.remove("text-bg-info");
     toastEl.classList.add("text-bg-alert");
 
     title.innerText = `🔥 ${data.title || "Quick Time Event"}`;
