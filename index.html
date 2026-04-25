@@ -229,13 +229,13 @@
     <button class="btn btn-success w-100 mt-2" onclick="uploadVideo()">Upload</button>
 
     <div style="position: relative; height: 15px;">
-      <p id="statusText" style="position:absolute; width:100%; margin:0;"></p>
+      <p id="videoStatus" style="position:absolute; width:100%; margin:0;"></p>
     </div>
     <button class="btn btn-outline-light w-100 mt-3" onclick="goDashboard()">Back to Dashboard</button>
   </div>
 </div>
 
-<div id="pictureTask" class="screen">
+<div id="photoTask" class="screen">
   <div class="card-ui text-center">
 
     <h4>📸 Task 3</h4>
@@ -375,10 +375,10 @@ function loadTask() {
 
   // PHOTO
   if (task.type === "photo") {
-    document.querySelector("#pictureTask h4").innerText = task.title;
-    document.querySelector("#pictureTask p").innerText = task.text;
+    document.querySelector("#photoTask h4").innerText = task.title;
+    document.querySelector("#photoTask p").innerText = task.text;
 
-    show("pictureTask");
+    show("photoTask");
   }
 }
 
@@ -392,8 +392,8 @@ function show(screen) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById(screen).classList.add("active");
 
-  if (screen === "clue2") {
-    document.getElementById("statusText").innerText = "";
+  if (screen === "recordTask") {
+    document.getElementById("videoStatus").innerText = "";
 
     const video = document.getElementById("preview");
     video.src = "";
@@ -403,13 +403,26 @@ function show(screen) {
     videoBlob = null;
     recordedChunks = [];
   }
+  if (screen === "photoTask") {
+    document.getElementById("photoStatus").innerText = "";
+
+    const video = document.getElementById("photoPreview");
+    video.srcObject = null;
+
+    const img = document.getElementById("capturedImage");
+    img.src = "";
+    img.style.display = "none";
+
+    photoBlob = null;
+  }
+
 
   if (screen === "pendingScreen") {
     document.getElementById("loadingText").innerText = "Waiting for approval";
   }
 
   if (screen !== "recordTask") stopCamera();
-  if (screen !== "pictureTask") stopPhotoCamera();
+  if (screen !== "photoTask") stopPhotoCamera();
 }
 
 // ---------------- START GAME ----------------
@@ -847,7 +860,7 @@ function startPolling() {
 
         setTimeout(() => {
           alert("Task rejected. Try again.");
-          show("clue2");
+          loadTask();
         }, 1200);
       }
 
