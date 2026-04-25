@@ -606,6 +606,10 @@ function spinWheel() {
 
   setTimeout(() => {
     spinning = false;
+    const canvas = document.getElementById("wheel");
+    canvas.style.transition = "none";
+    canvas.style.transform = "rotate(0deg)";
+    
     localStorage.setItem("group", assignedGroup);
     alert("You got Group " + assignedGroup + " 🎉");
     updateDashboard();
