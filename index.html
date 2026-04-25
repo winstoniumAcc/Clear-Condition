@@ -86,7 +86,7 @@
 <div id="playerHome" class="screen">
   <div class="card-ui text-center">
 
-    <h3>🏠 Your Dashboard</h3>
+    <h3>🏠 Dashboard</h3>
 
     <p><b>Name:</b> <span id="displayName"></span></p>
     <p><b>Group:</b> <span id="displayGroup"></span></p>
@@ -405,6 +405,8 @@ async function completeTask() {
     },
     body: JSON.stringify({ group })
   });
+
+  addPoints(10);
 }
 
 async function completeScan() {
