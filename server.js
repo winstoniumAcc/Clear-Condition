@@ -22,6 +22,32 @@ app.use(express.json());
 app.use("/videos", express.static("videos"));
 app.use(express.static(path.join(__dirname)));
 
+const paths = {
+  group4: [
+    {
+      type: "question",
+      title: "I have keys but no locks. What am I?",
+      answer: "piano",
+      nextLocationHint: "I have a lot of books.",
+      nextQR: "clue2"
+    },
+    {
+      type: "video",
+      title: "Record yourself running around the field",
+      nextLocationHint: "Near the basketball court stairs",
+      nextQR: "clue3"
+    },
+    {
+      type: "photo",
+      title: "Take a picture of another group's leader",
+      nextLocationHint: "Near canteen",
+      nextQR: "clue4"
+    }
+  ],
+};
+
+const progress = {};
+
 const session = require("express-session");
 
 app.use(session({
@@ -194,6 +220,11 @@ app.get("/reset", (req, res) => {
   console.log("SERVER RESET: all submissions and videos deleted");
 
   res.send("✅ Reset complete (videos + data cleared)");
+});
+
+app.get("/path", (req, res) => {
+  const group = req.query.group;
+  res.json(paths[group] || []);
 });
 
 app.post("/register", async (req, res) => {

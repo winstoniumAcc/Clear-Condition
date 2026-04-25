@@ -93,7 +93,7 @@
     <p><b>Points:</b> <span id="displayPoints">0</span></p>
 
     <button class="btn btn-success w-100 mt-3 btn-game"
-      onclick="show('clue1')">
+      onclick="loadPath()">
       Hunt
     </button>
     <button class="btn btn-warning w-100 mt-2"
@@ -177,7 +177,7 @@
 </div>
 
 <!-- CLUE 1 -->
-<div id="clue1" class="screen">
+<div id="questionTask" class="screen">
   <div class="card-ui text-center">
 
     <h4>🧩 Clue 1</h4>
@@ -206,7 +206,7 @@
 </div>
 
 <!-- TASK (REPLACES CLUE 2) -->
-<div id="clue2" class="screen">
+<div id="recordTask" class="screen">
   <div class="card-ui text-center">
 
     <h4>🏃 Task 2</h4>
@@ -248,7 +248,7 @@
   </div>
 </div>
 
-<div id="clue3" class="screen">
+<div id="pictureTask" class="screen">
   <div class="card-ui text-center">
 
     <h4>📸 Task 3</h4>
@@ -353,6 +353,56 @@ function playTransition(callback) {
   setTimeout(callback, 300);
 }
 
+async function loadPath() {
+  const group = localStorage.getItem("group");
+
+  const res = await fetch("https://clear-condition.onrender.com/path?group=" + group);
+  currentPath = await res.json();
+
+  currentTaskIndex = 0;
+
+  loadTask();
+}
+
+function loadTask() {
+  const task = currentPath[currentTaskIndex];
+
+  if (!task) {
+    alert("🎉 All tasks completed!");
+    return;
+  }
+
+  // QUESTION
+  if (task.type === "question") {
+    document.querySelector("#questionTask h4").innerText = "🧩 Question";
+    document.querySelector("#questionTask p").innerText = task.title;
+
+    document.getElementById("answer").value = "";
+    show("questionTask");
+  }
+
+  // VIDEO
+  if (task.type === "video") {
+    document.querySelector("#recordTask h4").innerText = "🏃 Record";
+    document.querySelector("#recordTask p").innerText = task.title;
+
+    show("recordTask");
+  }
+
+  // PHOTO
+  if (task.type === "photo") {
+    document.querySelector("#pictureTask h4").innerText = "📸 Picture";
+    document.querySelector("#pictureTask p").innerText = task.title;
+
+    show("pictureTask");
+  }
+}
+
+function nextTask() {
+  currentTaskIndex++;
+  loadTask();
+}
+
 // ---------------- SCREEN ----------------
 function show(screen) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
@@ -374,9 +424,8 @@ function show(screen) {
     document.getElementById("loadingText").innerText = "Waiting for approval";
   }
 
-  if (screen !== "clue2") stopCamera();
-
-  if (screen !== "clue3") stopPhotoCamera();  // photo 🔥 important
+  if (screen !== "recordTask") stopCamera();
+  if (screen !== "pictureTask") stopPhotoCamera();
 }
 
 // ---------------- START GAME ----------------
@@ -409,14 +458,31 @@ function startGame() {
 
 // ---------------- CLUE 1 ----------------
 function checkAnswer() {
-  let input = document.getElementById("answer");
-  let ans = input.value.toLowerCase().trim();
+  const task = currentPath[currentTaskIndex];
+  let ans = document.getElementById("answer").value.toLowerCase().trim();
 
-  if (ans === "piano") {
-    show("success1");
+  if (ans === task.answer) {
+    goToScanner(task); // 🔥 instantly scanner
   } else {
-    shake(input);
+    shake(document.getElementById("answer"));
   }
+}
+
+function goToScanner(task) {
+  document.getElementById("reader").innerHTML = "";
+
+  // set hint text
+  document.querySelector("#scanner h4").innerText = "📷 Scan QR Code";
+  document.querySelector("#scanner .card-ui p")?.remove();
+
+  const hint = document.createElement("p");
+  hint.className = "text-warning";
+  hint.innerText = "📍 Hint: " + task.nextLocationHint;
+
+  document.querySelector("#scanner .card-ui").prepend(hint);
+
+  show("scanner");
+  startScanner(task);
 }
 
 function drawWheel() {
@@ -573,22 +639,23 @@ function onScanSuccess(decodedText) {
   if (scanning) return;
   scanning = true;
 
-  const expectedQR = "CLUE" + (currentClue + 1);
+  const task = currentPath[currentTaskIndex];
+  const expectedQR = task.nextQR;
 
   html5QrCode.stop()
     .then(() => html5QrCode.clear())
     .then(() => {
       if (decodedText === expectedQR) {
-        currentClue++;
+      currentClue++;
 
-        playTransition(() => {
-          show("clue" + currentClue);
-        });
+      playTransition(() => {
+        nextTask(); // ✅ FIXED
+      });
 
-      } else {
-        alert("Wrong QR Code!");
-        show("success" + currentClue);
-      }
+    } else {
+      alert("Wrong QR Code!");
+      show("success" + currentClue);
+    }
     })
     .finally(() => {
       setTimeout(() => {
@@ -603,6 +670,8 @@ function stopScanner() {
     html5QrCode.stop().then(() => html5QrCode.clear());
   }
 }
+let currentPath = [];
+let currentTaskIndex = 0;
 
 let mediaRecorder;
 let recordedChunks = [];
@@ -709,8 +778,10 @@ async function uploadVideo() {
   }
 
   const formData = new FormData();
+  const task = currentPath[currentTaskIndex];
+
   formData.append("video", videoBlob, "recording.webm");
-  formData.append("task", "clue2");
+  formData.append("task", task.id || "video");
 
   try {
     document.getElementById("statusText").innerText = "Uploading...";
@@ -757,8 +828,11 @@ function startPolling() {
 
       console.log("ALL SUBMISSIONS:", data);
 
-      // get latest submission for this user + task
-    const userSubs = data .filter(s => s.name === currentUser && s.task === "clue2") .sort((a, b) => b.attempt - a.attempt);
+    const task = currentPath[currentTaskIndex];
+
+const userSubs = data
+  .filter(s => s.name === currentUser && s.task === task.id)
+  .sort((a, b) => b.attempt - a.attempt);
 
   console.log("USER SUBMISSIONS:", userSubs);
 
@@ -771,12 +845,13 @@ function startPolling() {
       if (latest.status === "approved") {
         clearInterval(pollInterval);
 
+        const task = currentPath[currentTaskIndex];
+
         document.getElementById("loadingText").innerText = "✅ Approved!";
 
         setTimeout(() => {
           alert("Task approved! 🎉");
-          // 👉 move to next clue if you have
-          // show("clue3");
+          goToScanner(task); // 🔥 AFTER APPROVAL → scanner
         }, 1000);
       }
 
