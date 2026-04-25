@@ -374,8 +374,8 @@ function loadTask() {
 
   // QUESTION
   if (task.type === "question") {
-    document.querySelector("#questionTask h4").innerText = "🧩 Question";
-    document.querySelector("#questionTask p").innerText = task.title;
+    document.querySelector("#questionTask h4").innerText = task.title;
+    document.querySelector("#questionTask p").innerText = task.text;
 
     document.getElementById("answer").value = "";
     show("questionTask");
@@ -383,16 +383,16 @@ function loadTask() {
 
   // VIDEO
   if (task.type === "video") {
-    document.querySelector("#recordTask h4").innerText = "🏃 Record";
-    document.querySelector("#recordTask p").innerText = task.title;
+    document.querySelector("#recordTask h4").innerText = task.title;
+    document.querySelector("#recordTask p").innerText = task.text;
 
     show("recordTask");
   }
 
   // PHOTO
   if (task.type === "photo") {
-    document.querySelector("#pictureTask h4").innerText = "📸 Picture";
-    document.querySelector("#pictureTask p").innerText = task.title;
+    document.querySelector("#pictureTask h4").innerText = task.title;
+    document.querySelector("#pictureTask p").innerText = task.text;
 
     show("pictureTask");
   }
@@ -781,7 +781,7 @@ async function uploadVideo() {
   const task = currentPath[currentTaskIndex];
 
   formData.append("video", videoBlob, "recording.webm");
-  formData.append("task", task.id || "video");
+  formData.append("task", task.text);
 
   try {
     document.getElementById("statusText").innerText = "Uploading...";
@@ -830,9 +830,7 @@ function startPolling() {
 
     const task = currentPath[currentTaskIndex];
 
-    console.log("TASK:", task.id);
-
-    const userSubs = data.filter(s => s.name === currentUser && s.task === task.id).sort((a, b) => b.attempt - a.attempt);
+    const userSubs = data.filter(s => s.name === currentUser && s.task === task.text).sort((a, b) => b.attempt - a.attempt);
 
   console.log("USER SUBMISSIONS:", userSubs);
 

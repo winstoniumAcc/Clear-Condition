@@ -26,20 +26,23 @@ const paths = {
   4: [
     {
       type: "question",
-      title: "I have keys but no locks. What am I?",
+      title: "Task 1",
+      text: "I have keys but no locks. What am I?",
       answer: "piano",
       nextLocationHint: "I have a lot of books.",
       nextQR: "CLUE2"
     },
     {
       type: "video",
-      title: "Record yourself running around the field",
+      title: "Task 2",
+      text: "Record yourself running around the field",
       nextLocationHint: "Near the basketball court stairs",
       nextQR: "CLUE2"
     },
     {
       type: "photo",
-      title: "Take a picture of another group's leader",
+      title: "Task 3",
+      text: "Take a picture of another group's leader",
       nextLocationHint: "Near canteen",
       nextQR: "CLUE2"
     }
