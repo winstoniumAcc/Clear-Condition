@@ -473,6 +473,7 @@ function checkAnswer() {
   let ans = document.getElementById("answer").value.toLowerCase().trim();
 
   if (ans === task.answer) {
+    completeTask();
     goToScanner(task); // 🔥 instantly scanner
   } else {
     shake(document.getElementById("answer"));
@@ -863,6 +864,7 @@ function startPolling() {
 
         setTimeout(() => {
           alert("Task approved! 🎉");
+          completeTask();
           goToScanner(task); // 🔥 AFTER APPROVAL → scanner
         }, 1000);
       }
