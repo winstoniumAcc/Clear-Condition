@@ -263,11 +263,22 @@
 </div>
 
 <!-- NOTIFICATION TOAST -->
-<div id="qteAlert" class="alert alert-danger text-center position-fixed top-0 start-50 translate-middle-x mt-3 shadow"
-     style="display:none; z-index:9999; min-width:300px;">
-  
-  <h4 id="qteTitle" class="alert-heading">⚠️ QTE Incoming!</h4>
-  <p id="qteTimer" class="mb-0"></p>
+<div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index:9999">
+
+  <div id="qteToast" class="toast text-bg-danger border-0" role="alert">
+    
+    <div class="d-flex">
+      <div class="toast-body text-center w-100">
+        <strong id="qteTitle">⚠️ QTE</strong>
+        <div id="qteTimer">Starting soon...</div>
+      </div>
+
+      <button type="button" class="btn-close btn-close-white me-2 m-auto"
+              onclick="hideQTE()"></button>
+    </div>
+
+  </div>
+
 </div>
 
 <script>
@@ -865,10 +876,19 @@ function goDashboard() {
   show("playerHome");
 }
 
+let qteToast;
 let lastQTEState = "";
 
+window.addEventListener("DOMContentLoaded", () => {
+  const toastEl = document.getElementById("qteToast");
+
+  qteToast = new bootstrap.Toast(toastEl, {
+    autohide: false
+  });
+});
+
 function updateQTEUI(data) {
-  const box = document.getElementById("qteAlert");
+  const toastEl = document.getElementById("qteToast");
   const title = document.getElementById("qteTitle");
   const timer = document.getElementById("qteTimer");
 
@@ -878,28 +898,34 @@ function updateQTEUI(data) {
 
   // 🔴 COUNTDOWN
   if (data.countdown > 0) {
-    box.style.display = "block";
-    box.classList.remove("alert-success");
-    box.classList.add("alert-danger");
+    toastEl.classList.remove("text-bg-success");
+    toastEl.classList.add("text-bg-danger");
 
-    title.innerText = `⚠️ ${data.title} starting soon`;
+    title.innerText = `⚠️ ${data.title || "QTE Starting Soon"}`;
     timer.innerText = `Starting in ${data.countdown}s...`;
+
+    qteToast.show();
   }
 
   // 🟢 ACTIVE
   else if (data.active) {
-    box.style.display = "block";
-    box.classList.remove("alert-danger");
-    box.classList.add("alert-success");
+    toastEl.classList.remove("text-bg-danger");
+    toastEl.classList.add("text-bg-success");
 
-    title.innerText = `🔥 ${data.title}`;
-    timer.innerText = "DO THE TASK NOW!";
+    title.innerText = `🔥 ${data.title || "Quick Time Event"}`;
+    timer.innerText = "DO IT NOW!";
+
+    qteToast.show();
   }
 
-  // ❌ HIDDEN
+  // ❌ HIDE
   else {
-    box.style.display = "none";
+    qteToast.hide();
   }
+}
+
+function hideQTE() {
+  if (qteToast) qteToast.hide();
 }
 
 setInterval(async () => {
@@ -909,7 +935,7 @@ setInterval(async () => {
 
     updateQTEUI(data);
   } catch (err) {
-    console.error("QTE fetch error:", err);
+    console.error(err);
   }
 }, 1000);
 </script>
