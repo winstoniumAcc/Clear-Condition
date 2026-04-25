@@ -148,7 +148,6 @@ app.post("/upload", upload.single("file"), (req, res) => {
 
   const task = req.body.task;
 
-  // 🔒 LOGIN CHECK HERE
   const users = getUsers();
   const user = users.find(u => u.name === name);
 
@@ -156,7 +155,6 @@ app.post("/upload", upload.single("file"), (req, res) => {
     return res.status(401).send("Not logged in");
   }
 
-  // count attempts
   const attemptCount = submissions.filter(
     s => s.name === name && s.task === task
   ).length + 1;
