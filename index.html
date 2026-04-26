@@ -1339,6 +1339,7 @@ function updateQTEUI(data, data1) {
       timer.innerText = "Be the fastest group to earn more points!";
        document.querySelectorAll(".goBackDash").forEach(el => {el.style.display = "none";});
     } else {
+      qteActive = false;
       timer.innerText = data1.text;
     }
 
