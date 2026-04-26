@@ -674,7 +674,8 @@ function checkPuzzle() {
   if (win) {
     alert("Puzzle solved!");
     completeTask();
-    nextTask();
+    currentStage = "scanner";
+    loadTask();
   } else {
     alert("Not solved yet!");
   }
@@ -743,7 +744,8 @@ function checkMemory() {
   if (memoryMatched.length === 8) {
     alert("Memory completed!");
     completeTask();
-    nextTask();
+    currentStage = "scanner";
+    loadTask();
   }
 }
 
