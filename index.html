@@ -179,7 +179,7 @@
     <h4>📤 Task Uploaded</h4>
     <div class="spinner-border text-light my-3"></div>
     <h5 id="loadingText">Waiting for approval</h5>
-    <p class="text-muted">Please wait...</p>
+    <p>Please wait...</p>
   </div>
 </div>
 
@@ -278,6 +278,42 @@
 
     <button class="btn btn-outline-light w-100 mt-3 goBackDash" onclick="goDashboard()">Back to Dashboard</button>
 
+  </div>
+</div>
+
+<div id="slideTask" class="screen">
+  <div class="card-ui text-center">
+    <h4>🧩 Slide Puzzle</h4>
+    <p>Arrange the image correctly</p>
+
+   <div id="puzzleBoard" style="
+    width: 300px;
+    height: 300px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: black;
+  "></div>
+
+    <button class="btn btn-success w-100 mt-3" onclick="checkPuzzle()">Check</button>
+    <button class="btn btn-outline-light w-100 mt-2 goBackDash" onclick="goDashboard()">Back</button>
+  </div>
+</div>
+
+<div id="memoryTask" class="screen">
+  <div class="card-ui text-center">
+    <h4>🧠 Memory Card</h4>
+    <p>Find all matching pairs</p>
+
+    <div id="memoryBoard" style="
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    "></div>
+
+    <button class="btn btn-outline-light w-100 mt-3 goBackDash" onclick="goDashboard()">Back</button>
   </div>
 </div>
 
@@ -427,6 +463,19 @@ function loadTask() {
 
     show("photoTask");
   }
+
+  if (task.type === "puzzle") {
+    document.querySelector("#slideTask h4").innerText = task.title;
+    show("slideTask");
+    initSlidePuzzle(task);
+  }
+
+  // MEMORY CARD
+  if (task.type === "memory") {
+    document.querySelector("#memoryTask h4").innerText = task.title;
+    show("memoryTask");
+    initMemoryGame(task);
+  }
   }
 
   if (currentStage == "scanner") {
@@ -539,6 +588,162 @@ function checkAnswer() {
     }
   } else {
     shake(document.getElementById("answer"));
+  }
+}
+
+let puzzleState = [];
+let puzzleImage = "";
+
+function initSlidePuzzle(task) {
+  const board = document.getElementById("puzzleBoard");
+  board.innerHTML = "";
+
+  puzzleImage = task.text; // 🔥 image URL from server
+
+  const size = 3;
+  const total = size * size;
+
+  let tiles = [...Array(total - 1).keys()];
+
+  tiles.push(null);
+
+  tiles.sort(() => Math.random() - 0.5);
+
+  puzzleState = tiles;
+
+  renderPuzzle();
+}
+
+function renderPuzzle() {
+  const board = document.getElementById("puzzleBoard");
+  board.innerHTML = "";
+
+  const size = 3;
+
+  puzzleState.forEach((val, i) => {
+    const div = document.createElement("div");
+
+    div.style = `
+      width: 100px;
+      height: 100px;
+      background-image: url('${puzzleImage}');
+      background-size: 300px 300px;
+      border-radius: 6px;
+      cursor: pointer;
+    `;
+
+    if (val === null) {
+      div.style.background = "#111";
+      div.style.backgroundImage = "none";
+    } else {
+      const x = (val % size) * 100;
+      const y = Math.floor(val / size) * 100;
+
+      div.style.backgroundPosition = `-${x}px -${y}px`;
+    }
+
+    div.onclick = () => moveTile(i);
+
+    board.appendChild(div);
+  });
+}
+
+function moveTile(index) {
+  const emptyIndex = puzzleState.indexOf(null);
+
+  const validMoves = [
+    emptyIndex - 1,
+    emptyIndex + 1,
+    emptyIndex - 3,
+    emptyIndex + 3
+  ];
+
+  if (validMoves.includes(index)) {
+    [puzzleState[index], puzzleState[emptyIndex]] =
+      [puzzleState[emptyIndex], puzzleState[index]];
+
+    renderPuzzle();
+  }
+}
+
+function checkPuzzle() {
+  const win = puzzleState
+    .slice(0, 8)
+    .every((v, i) => v === i);
+
+  if (win) {
+    alert("Puzzle solved!");
+    completeTask();
+    nextTask();
+  } else {
+    alert("Not solved yet!");
+  }
+}
+
+let memoryFlipped = [];
+let memoryMatched = [];
+
+function initMemoryGame(task) {
+  const board = document.getElementById("memoryBoard");
+  board.innerHTML = "";
+
+  memoryFlipped = [];
+  memoryMatched = [];
+
+  let values = ["🍎","🍌","🍇","🍓","🍎","🍌","🍇","🍓"];
+
+  values.sort(() => Math.random() - 0.5);
+
+  values.forEach((val, i) => {
+    const card = document.createElement("div");
+
+    card.style = `
+      height: 70px;
+      background: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      cursor: pointer;
+      border-radius: 10px;
+    `;
+
+    card.innerText = "❓";
+
+    card.onclick = () => flipCard(card, val, i);
+
+    board.appendChild(card);
+  });
+}
+
+function flipCard(card, value, index) {
+  if (memoryFlipped.length >= 2) return;
+  if (memoryMatched.includes(index)) return;
+
+  card.innerText = value;
+  memoryFlipped.push({ card, value, index });
+
+  if (memoryFlipped.length === 2) {
+    setTimeout(checkMemory, 700);
+  }
+}
+
+function checkMemory() {
+  const [a, b] = memoryFlipped;
+
+  if (a.value === b.value) {
+    memoryMatched.push(a.index, b.index);
+  } else {
+    a.card.innerText = "❓";
+    b.card.innerText = "❓";
+  }
+
+  memoryFlipped = [];
+
+  if (memoryMatched.length === 8) {
+    alert("Memory completed!");
+    completeTask();
+    nextTask();
   }
 }
 
@@ -1399,7 +1604,7 @@ function showQTEEnded() {
   toastEl.classList.remove("text-bg-primary", "text-bg-success");
   toastEl.classList.add("text-bg-danger");
 
-  document.getElementById("qteTitle").innerText = "Special Global Event Ended";
+  document.getElementById("qteTitle").innerText = "Global Event Ended";
   document.getElementById("qteTimer").innerText = "Treasure hunt resumed";
 
   qteToast.show();

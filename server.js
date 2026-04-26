@@ -25,29 +25,44 @@ app.use(express.static(path.join(__dirname)));
 const paths = {
   4: [
     {
+      nextLocationHint: "Di PPT",
+      nextQR: "START"
+    },
+    {
       type: "question",
       title: "Task 1",
-      text: "I have keys but no locks. What am I?",
-      answer: "piano",
-      nextLocationHint: "I have a lot of books.",
-      nextQR: "CLUE2"
+      text: "Apa angka berikutnya: 5, 11, 23, 47, ?",
+      answer: "95",
+      nextLocationHint: "",
+      nextQR: "1CLUE1"
     },
     {
       type: "video",
       title: "Task 2",
-      text: "Record yourself running around the field",
-      nextLocationHint: "Near the basketball court stairs",
-      nextQR: "CLUE2"
+      text: "Lari memutari lapangan gor bawah 3x (2 anggota bersamaan)",
+      nextLocationHint: "",
+      nextQR: "1CLUE2"
     },
     {
       type: "photo",
       title: "Task 3",
-      text: "Take a picture of another group's leader",
-      nextLocationHint: "Near canteen",
-      nextQR: "CLUE2"
+      text: "Foto 1 buku fisika, 1 buku mandarin, 1 buku inggris (1 anggota memegang 1 buku)",
+      nextLocationHint: "",
+      nextQR: "1CLUE3"
+    },
+     {
+      type: "puzzle",
+      title: "Task 4",
+      text: "https://cdn.acidcow.com/pics/20100629/most_popular_imgur_images_45.jpg",
+      nextLocationHint: "",
+      nextQR: "1CLUE4"
     }
   ],
    3: [
+    {
+      nextLocationHint: "Di PPT",
+      nextQR: "START"
+    },
     {
       type: "question",
       title: "Task 1",
@@ -74,10 +89,10 @@ const paths = {
 };
 
 let groupProgress = {
-  "1": { taskIndex: 0, stage: "task" },
-  "2": { taskIndex: 0, stage: "task" },
-  "3": { taskIndex: 0, stage: "task" },
-  "4": { taskIndex: 0, stage: "task" }
+  "1": { taskIndex: 0, stage: "scanner" },
+  "2": { taskIndex: 0, stage: "scanner" },
+  "3": { taskIndex: 0, stage: "scanner" },
+  "4": { taskIndex: 0, stage: "scanner" }
 };
 
 let shield = {
