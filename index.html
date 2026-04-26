@@ -1297,7 +1297,7 @@ async function syncQTE() {
     updateQTEUI(data);
 
     // 🔥 AUTO ENTER QTE SCREEN IF ACTIVE
-    if ((data.active || data.countdown > 0) && data.type !== "notification") {
+    if ((data.active || data.countdown > 0) && data.type) {
       loadTask();
     }
 
@@ -1316,7 +1316,7 @@ function updateQTEUI(data) {
   lastQTEState = stateString;
 
   // 🔴 COUNTDOWN
-  if (data.type === "notification") {
+  if (!data.type) {
     toastEl.classList.remove("text-bg-primary", "text-bg-success");
     toastEl.classList.add("text-bg-warning");
 
