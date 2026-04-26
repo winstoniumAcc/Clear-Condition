@@ -1,12 +1,12 @@
 <h2>Submissions</h2>
 <div id="list"></div>
 
+<button onclick="startQTE()" class="btn btn-primary w-100">Start QTE</button>
+<button onclick="endQTE()" class="btn btn-danger w-100 mt-2">End QTE</button>
+
 <input id="qteTitle" class="form-control mb-2" placeholder="Event title">
 <input id="qteCountdown" type="number" class="form-control mb-2" placeholder="Countdown (seconds)">
 <input id="qteDuration" type="number" class="form-control mb-2" placeholder="Active duration (seconds)">
-
-<button onclick="startQTE()" class="btn btn-primary w-100">Start QTE</button>
-<button onclick="endQTE()" class="btn btn-danger w-100 mt-2">End QTE</button>
 
 <select id="qteType" class="form-control mb-2">
   <option value="notification">Notification</option>
@@ -18,7 +18,6 @@
 <textarea id="qteText" class="form-control mb-2" placeholder="Task Text"></textarea>
 
 <input id="qteAnswer" class="form-control mb-2" placeholder="Answer (only for question)">
-<input id="qteReward" class="form-control mb-2" placeholder="Reward points">
 
 <div class="card-ui text-center mt-3">
 
@@ -153,7 +152,6 @@ async function startQTE() {
   const title = document.getElementById("qteTitle").value;
   const text = document.getElementById("qteText").value;
   const answer = document.getElementById("qteAnswer").value;
-  const reward = Number(document.getElementById("qteReward").value) || 0;
 
   const countdown = Number(document.getElementById("qteCountdown").value || 0);
   const duration = Number(document.getElementById("qteDuration").value || 0);
@@ -161,8 +159,7 @@ async function startQTE() {
   let task = {
     type,
     title,
-    text,
-    reward
+    text
   };
 
   // 🔥 only question type needs answer

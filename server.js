@@ -212,7 +212,8 @@ app.post("/upload", upload.single("file"), (req, res) => {
     task,
     attempt: attemptCount,
     file: req.file.filename,
-    status: "pending"
+    status: "pending",
+    time: Date.now()
   };
 
   submissions.push(entry);
@@ -223,14 +224,13 @@ app.post("/upload", upload.single("file"), (req, res) => {
 app.get("/submissions", (req, res) => {
 
   submissions = submissions.filter(sub => {
-
     const filePath = path.join(__dirname, "videos", sub.file);
-
-    // keep only if file exists
     return fs.existsSync(filePath);
   });
 
-  res.json(submissions);
+  const sorted = [...submissions].sort((a, b) => a.time - b.time);
+
+  res.json(sorted);
 });
 
 app.post("/approve/:id", (req, res) => {
