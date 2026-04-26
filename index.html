@@ -529,7 +529,7 @@ function checkAnswer() {
   console.log(task.type);
 
   if (ans === task.answer) {
-    if (task.type === "qte") {
+    if (task.qte) {
       setQteStatus(assignedGroup, "active");
       show("qteWaiting");
     } else {
@@ -948,7 +948,7 @@ function startPolling() {
 
         setTimeout(() => {
           alert("Task approved! 🎉");
-           if (task.type === "qte") {
+           if (task.qte) {
             setQteStatus(assignedGroup, "active");
             show("qteWaiting");
             return;
