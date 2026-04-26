@@ -832,7 +832,7 @@ function showPreview() {
   video.srcObject = null;
   video.src = url;
   video.controls = true;
-  video.muted = false; // allow playback sound
+  video.muted = true; // allow playback sound
 
   video.play();
 }
