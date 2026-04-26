@@ -420,6 +420,7 @@ app.post("/start-qte", (req, res) => {
     title: "QTE Challenge",
     text: "Be the fastest team!",
     answer: "",
+    type: "qte"
   };
 
   Object.keys(qteStatus).forEach(g => {
