@@ -1300,7 +1300,7 @@ async function syncQTE() {
     updateQTEUI(data, data1);
 
     // 🔥 AUTO ENTER QTE SCREEN IF ACTIVE
-    if ((data.active || data.countdown > 0) && data1.type !== "notification") {
+    if ((data.active || data.countdown > 0) && data1?.type !== "notification") {
       loadTask();
     }
 
@@ -1319,7 +1319,7 @@ function updateQTEUI(data, data1) {
   lastQTEState = stateString;
 
   // 🔴 COUNTDOWN
-  if (data.countdown > 0 && data1.type !== "notification") {
+  if (data.countdown > 0 && data1?.type !== "notification") {
     toastEl.classList.remove("text-bg-success", "text-bg-danger");
     toastEl.classList.add("text-bg-primary");
 
@@ -1335,7 +1335,7 @@ function updateQTEUI(data, data1) {
     toastEl.classList.add("text-bg-success");
 
     title.innerText = `${data.title || "Quick Time Event"}`;
-    if (data1.type !== "notification") {
+    if (data1?.type !== "notification") {
       timer.innerText = "Be the fastest group to earn more points!";
        document.querySelectorAll(".goBackDash").forEach(el => {el.style.display = "none";});
     } else {
@@ -1401,7 +1401,7 @@ setInterval(async () => {
   if (data.active && !qteActive && isLeader()) {
     qteActive = true;
 
-    if (qteTask && qteTask.type !== "notification") {
+    if (qteTask?.type !== "notification") {
       if (document.getElementById("playerHome").classList.contains("active") || document.getElementById("wheelScreen").classList.contains("active")) {
         originalTask = "Dashboard";
 
@@ -1426,7 +1426,7 @@ setInterval(async () => {
     }
   }
 
-  if (!data.active && qteActive && isLeader() && qteTask.type !== "notification") {
+  if (!data.active && qteActive && isLeader() && qteTask?.type !== "notification") {
     qteActive = false;
 
     showQTEEnded();
