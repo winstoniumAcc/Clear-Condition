@@ -1294,10 +1294,13 @@ async function syncQTE() {
     const res = await fetch("https://clear-condition.onrender.com/qte");
     const data = await res.json();
 
+    const res1 = await fetch("https://clear-condition.onrender.com/qte-task");
+    const data1 = await res1.json();
+
     updateQTEUI(data);
 
     // 🔥 AUTO ENTER QTE SCREEN IF ACTIVE
-    if ((data.active || data.countdown > 0) && data.type) {
+    if ((data.active || data.countdown > 0) && data1.type !== "notification") {
       loadTask();
     }
 
@@ -1306,7 +1309,7 @@ async function syncQTE() {
   }
 }
 
-function updateQTEUI(data) {
+function updateQTEUI(data, data1) {
   const toastEl = document.getElementById("qteToast");
   const title = document.getElementById("qteTitle");
   const timer = document.getElementById("qteTimer");
@@ -1316,18 +1319,7 @@ function updateQTEUI(data) {
   lastQTEState = stateString;
 
   // 🔴 COUNTDOWN
-  if (!data.type) {
-    toastEl.classList.remove("text-bg-primary", "text-bg-success");
-    toastEl.classList.add("text-bg-warning");
-
-    title.innerText = data.title || "Notification";
-    timer.innerText = data.text || "";
-
-    qteToast.show();
-    return; // 🚨 STOP HERE so it doesn't behave like QTE
-  }
-
-  if (data.countdown > 0) {
+  if (data.countdown > 0 && data1.type !== "notification") {
     toastEl.classList.remove("text-bg-success", "text-bg-danger");
     toastEl.classList.add("text-bg-primary");
 
@@ -1343,20 +1335,19 @@ function updateQTEUI(data) {
     toastEl.classList.add("text-bg-success");
 
     title.innerText = `${data.title || "Quick Time Event"}`;
-    timer.innerText = "Be the fastest group to earn more points!";
+    if (data1.type !== "notification") {
+      timer.innerText = "Be the fastest group to earn more points!";
+       document.querySelectorAll(".goBackDash").forEach(el => {el.style.display = "none";});
+    } else {
+      timer.innerText = data1.text;
+    }
 
     qteToast.show();
-
-    document.querySelectorAll(".goBackDash").forEach(el => {
-    el.style.display = "none";
-  });
   }
 
   // ❌ HIDE
   else {
-    document.querySelectorAll(".goBackDash").forEach(el => {
-    el.style.display = "block";
-  });
+    document.querySelectorAll(".goBackDash").forEach(el => {el.style.display = "block";});
   }
 }
 
@@ -1402,15 +1393,15 @@ setInterval(async () => {
   const res = await fetch("https://clear-condition.onrender.com/qte");
   const data = await res.json();
 
+  const taskRes = await fetch("https://clear-condition.onrender.com/qte-task");
+  const qteTask = await taskRes.json();
+
   updateQTEUI(data);
 
   if (data.active && !qteActive && isLeader()) {
     qteActive = true;
 
-    const taskRes = await fetch("https://clear-condition.onrender.com/qte-task");
-    const qteTask = await taskRes.json();
-
-    if (qteTask) {
+    if (qteTask && qteTask.type !== "notification") {
       if (document.getElementById("playerHome").classList.contains("active") || document.getElementById("wheelScreen").classList.contains("active")) {
         originalTask = "Dashboard";
 
@@ -1435,7 +1426,7 @@ setInterval(async () => {
     }
   }
 
-  if (!data.active && qteActive && isLeader()) {
+  if (!data.active && qteActive && isLeader() && qteTask.type !== "notification") {
     qteActive = false;
 
     showQTEEnded();
