@@ -139,7 +139,8 @@ function savePoints(points) {
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, videosDir),
   filename: (req, file, cb) => {
-    cb(null, Date.now() + ".webm");
+    const ext = path.extname(file.originalname); // 🔥 get .jpg / .png / .webm
+    cb(null, Date.now() + ext);
   }
 });
 
