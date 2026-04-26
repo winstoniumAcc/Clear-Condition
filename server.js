@@ -77,7 +77,6 @@ let qte = {
   countdown: 0,
   endsAt: null,
   title: "Quick Time Event",
-  qte: true
 };
 let qteInterval = null;
 let qteTask = null;
@@ -411,11 +410,10 @@ app.post("/start-qte", (req, res) => {
   qte.active = false;
   qte.countdown = countdown;
   qte.endsAt = null;
-  qte.title = title;
-  qte.qte = true;
+  qte.title = title || "Quick Time Event";
 
-  // ✅ overwrite QTE task cleanly
   qteTask = task;
+  qteTask.qte = true;
 
   Object.keys(qteStatus).forEach(g => {
     qteStatus[g] = "inactive";
