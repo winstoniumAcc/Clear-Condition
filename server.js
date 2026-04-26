@@ -47,6 +47,30 @@ const paths = {
       nextQR: "CLUE2"
     }
   ],
+   3: [
+    {
+      type: "question",
+      title: "Task 1",
+      text: "I have keys but no locks. What am I?",
+      answer: "piano",
+      nextLocationHint: "I have a lot of books.",
+      nextQR: "CLUE2"
+    },
+    {
+      type: "video",
+      title: "Task 2",
+      text: "Record yourself running around the field",
+      nextLocationHint: "Near the basketball court stairs",
+      nextQR: "CLUE2"
+    },
+    {
+      type: "photo",
+      title: "Task 3",
+      text: "Take a picture of another group's leader",
+      nextLocationHint: "Near canteen",
+      nextQR: "CLUE2"
+    }
+  ],
 };
 
 let groupProgress = {
@@ -87,34 +111,21 @@ let qteStatus = {
   "4": "inactive"
 };
 
-// create file if not exists
-if (!fs.existsSync(usersFile)) {
-  fs.writeFileSync(usersFile, JSON.stringify([
-    { "name": "Alvaro", "password": null },
-    { "name": "Ben", "password": null },
-    { "name": "Bryan", "password": null },
-    { "name": "Cathleen", "password": null },
-    { "name": "Cheryl", "password": null },
-    { "name": "Christian", "password": null },
-    { "name": "Cliff", "password": null },
-    { "name": "Felix", "password": null },
-    { "name": "Frederick", "password": null },
-    { "name": "Gizelle", "password": null },
-    { "name": "Grace", "password": null },
-    { "name": "Gwillbert", "password": null },
-    { "name": "Jasmine", "password": null },
-    { "name": "Jeniffer", "password": null },
-    { "name": "Jessica", "password": null },
-    { "name": "Kathleen", "password": null },
-    { "name": "Keiko", "password": null },
-    { "name": "Sin", "password": null },
-    { "name": "Viona", "password": null },
-    { "name": "Priscilla", "password": null },
-    { "name": "Victor", "password": null },
-    { "name": "Wendellyne", "password": null },
-    { "name": "Winston", "password": null }
-  ], null, 2));
-}
+const hiddenQRCodes = {
+  "HIDDEN1": { type: "Steal", value: 5 },
+  "HIDDEN2": { type: "Points", value: 5 },
+  "HIDDEN3": { type: "Trap", value: 5 },
+  "HIDDEN4": { type: "Double", value: 2 },
+  "HIDDEN5": { type: "Steal", value: 5 },
+  "HIDDEN6": { type: "Points", value: 5 },
+  "HIDDEN7": { type: "Trap", value: 5 },
+  "HIDDEN8": { type: "Double", value: 2 },
+  "HIDDEN9": { type: "Steal", value: 5 },
+  "HIDDEN10": { type: "Points", value: 5 },
+  "HIDDEN11": { type: "Trap", value: 5 },
+  "HIDDEN12": { type: "Double", value: 2 }
+};
+const scannedHiddenQR = [];
 
 function getUsers() {
   return JSON.parse(fs.readFileSync(usersFile));
@@ -489,6 +500,54 @@ app.post("/end-qte", (req, res) => {
 
 app.get("/qte", (req, res) => {
   res.json(qte);
+});
+
+app.post("/scan-hidden-qr", (req, res) => {
+  const { group, qr } = req.body;
+
+  if (!group || !qr) {
+    return res.status(400).json({ error: "Missing data" });
+  }
+
+  const reward = hiddenQRCodes[qr];
+
+  // ❌ Not a hidden QR
+  if (!reward) {
+    return res.json({
+      success: false,
+      message: "Not a hidden QR"
+    });
+  }
+
+  // ❌ Already claimed globally
+  if (scannedHiddenQR.includes(qr)) {
+    return res.json({
+      success: false,
+      message: "Already claimed by another team"
+    });
+  }
+
+  // ✅ Mark as claimed
+  scannedHiddenQR.push(qr);
+
+  let message = "";
+
+  // 🎁 POINTS
+  if (reward.type === "Points") {
+    message = `+${reward.value} points!`;
+  }
+
+  // 🕵️ STEAL
+  if (reward.type === "Steal") {
+    message = `Steal ${reward.value} points from any group!`;
+  }
+
+  res.json({
+    success: true,
+    type: reward.type,
+    value: reward.value,
+    message
+  });
 });
 
 const PORT = process.env.PORT || 3000;

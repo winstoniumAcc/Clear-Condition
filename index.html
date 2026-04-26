@@ -97,9 +97,7 @@
       Hunt
     </button>
     <button id="scanBtn" class="btn btn-info w-100 mt-2 btn-game"
-  onclick="show('scanner'); startScanner();">
-  📷 Scan Hidden QR
-</button>
+  onclick="openMemberScanner();">Scan</button>
     <button class="btn btn-warning w-100 mt-2"
   onclick="show('leaderboard'); loadLeaderboard();">
   🏆 Leaderboard
@@ -558,7 +556,7 @@ function goToScanner(task) {
   document.querySelector("#scanner .card-ui").prepend(hint);
 
   show("scanner");
-  startScanner(task);
+  startScanner();
 }
 
 function drawWheel() {
@@ -651,6 +649,8 @@ function shake(el) {
 }
 
 async function updateDashboard() {
+  stopScanner();
+
 
   let name = currentUser;
   let group = assignedGroup;
@@ -736,6 +736,35 @@ function onScanSuccess(decodedText) {
   html5QrCode.stop()
     .then(() => html5QrCode.clear())
     .then(() => {
+
+        // 🔥 MEMBER MODE (non-leader)
+      if (!leaders.includes(currentUser)) {
+
+        fetch("https://clear-condition.onrender.com/scan-hidden-qr", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            group: "Group " + assignedGroup,
+            qr: decodedText
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          alert(data.message);
+
+          if (data.success && data.type === "Points") {
+            addPoints(data.value);
+          }
+
+          updateDashboard();
+          show("playerHome");
+        });
+
+        return;
+      }
+
       if (decodedText === expectedQR) {
 
       playTransition(() => {
@@ -765,6 +794,13 @@ async function stopScanner() {
   } catch (err) {
     console.log("Scanner already stopped:", err.message);
   }
+}
+
+function openMemberScanner() {
+  document.querySelector("#scanner h4").innerText = "📷 Scan Hidden QR Codes";
+  document.querySelector("#scanner .card-ui p")?.remove();
+  show("scanner");
+  startScanner();
 }
 
 let currentPath = [];
