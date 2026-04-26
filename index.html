@@ -96,6 +96,10 @@
       onclick="loadPath()">
       Hunt
     </button>
+    <button id="scanBtn" class="btn btn-info w-100 mt-2 btn-game"
+  onclick="show('scanner'); startScanner();">
+  📷 Scan Hidden QR
+</button>
     <button class="btn btn-warning w-100 mt-2"
   onclick="show('leaderboard'); loadLeaderboard();">
   🏆 Leaderboard
@@ -672,11 +676,13 @@ async function updateDashboard() {
   }
 
   const huntBtn = document.querySelector("#playerHome .btn-success");
-
+  const scanBtn = document.getElementById("scanBtn");
   if (leaders.includes(name)) {
     huntBtn.style.display = "block";
+    scanBtn.style.display = "none";
   } else {
     huntBtn.style.display = "none";
+    scanBtn.style.display = "block";
   }
 }
 
