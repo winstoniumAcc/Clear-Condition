@@ -526,17 +526,17 @@ function checkAnswer() {
   const task = currentPath[currentTaskIndex];
   let ans = document.getElementById("answer").value.toLowerCase().trim();
 
+  console.log(task.type);
+
   if (ans === task.answer) {
     if (task.type === "qte") {
       setQteStatus(assignedGroup, "active");
       show("qteWaiting");
-      console.log("qte shown");
-      return;
+    } else {
+      completeTask();
+      currentStage = "scanner";
+      loadTask();
     }
-
-    completeTask();
-    currentStage = "scanner";
-    loadTask();
   } else {
     shake(document.getElementById("answer"));
   }
