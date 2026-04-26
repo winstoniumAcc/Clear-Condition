@@ -730,15 +730,11 @@ function onScanSuccess(decodedText) {
   if (scanning) return;
   scanning = true;
 
-  const task = currentPath[currentTaskIndex];
-  const expectedQR = task.nextQR;
-
   html5QrCode.stop()
     .then(() => html5QrCode.clear())
     .then(() => {
 
       if (!leaders.includes(currentUser)) {
-        console.log("Scan member")
         fetch("https://clear-condition.onrender.com/scan-hidden-qr", {
           method: "POST",
           headers: {
@@ -759,7 +755,9 @@ function onScanSuccess(decodedText) {
         });
 
       } else {
-            console.log("Scan normal")
+          const task = currentPath[currentTaskIndex];
+          const expectedQR = task.nextQR;
+
          if (decodedText === expectedQR) {
 
         playTransition(() => {
@@ -775,7 +773,6 @@ function onScanSuccess(decodedText) {
     })
     .finally(() => {
       setTimeout(() => {
-        console.log("Scan now false")
         scanning = false;
       }, 1000);
     });
