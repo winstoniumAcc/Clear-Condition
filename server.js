@@ -132,7 +132,7 @@ const hiddenQRCodes = {
   "HIDDEN11": "Shield",
   "HIDDEN12": "Shield"
 };
-const scannedHiddenQR = [];
+const scannedHiddenQR = {};
 
 function getUsers() {
   return JSON.parse(fs.readFileSync(usersFile));
@@ -522,24 +522,21 @@ app.post("/scan-hidden-qr", (req, res) => {
     return res.json({ success: false, message: "Not a hidden QR" });
   }
 
-  if (scannedHiddenQR.includes(qr)) {
-    return res.json({ success: false, message: "Already claimed by another team" });
+  if (scannedHiddenQR[qr]?.includes(group)) {
+    return res.json({ success: false, message: "Already claimed by your group" });
   }
 
-  scannedHiddenQR.push(qr);
+  if (!scannedHiddenQR[qr]) scannedHiddenQR[qr] = [];
+  scannedHiddenQR[qr].push(group);
 
   const points = getPoints();
-
-  // 🔒 safety init
-  if (!points[group]) points[group] = 0;
-  if (!shield[group]) shield[group] = 0;
 
   let message = "";
 
   // =========================
   // 🎁 WIN (+5 points)
   // =========================
-  if (reward.type === "Win") {
+  if (reward === "Win") {
     points[group] += 5;
     message = "Your group has gained 5 points!";
   }
@@ -547,7 +544,7 @@ app.post("/scan-hidden-qr", (req, res) => {
   // =========================
   // 💀 LOSE (-5 points, shield blocks)
   // =========================
-  if (reward.type === "Lose") {
+  if (reward === "Lose") {
     if (shield[group] > 0) {
       shield[group]--;
       message = "Blocked by shield! No points lost.";
@@ -560,7 +557,7 @@ app.post("/scan-hidden-qr", (req, res) => {
   // =========================
   // 🕵️ STEAL (2 points from each group)
   // =========================
-  if (reward.type === "Steal") {
+  if (reward === "Steal") {
     let totalStolen = 0;
 
     Object.keys(points).forEach(g => {
@@ -587,7 +584,7 @@ app.post("/scan-hidden-qr", (req, res) => {
   // =========================
   // 🛡️ SHIELD (+1 shield)
   // =========================
-  if (reward.type === "Shield") {
+  if (reward === "Shield") {
     shield[group] += 1;
     message = "Your group gained 1 shield!";
   }
@@ -596,7 +593,7 @@ app.post("/scan-hidden-qr", (req, res) => {
 
   res.json({
     success: true,
-    type: reward.type,
+    type: reward,
     message,
     shield: shield[group],
     points: points[group]
