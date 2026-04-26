@@ -528,7 +528,7 @@ function checkAnswer() {
 
   if (ans === task.answer) {
     if (task.type === "qte") {
-      setQteStatus(assignedGroup, "active")
+      setQteStatus(assignedGroup, "active");
       show("qteWaiting");
       return;
     }
@@ -948,7 +948,7 @@ function startPolling() {
         setTimeout(() => {
           alert("Task approved! 🎉");
            if (task.type === "qte") {
-            setQteStatus(assignedGroup, "active")
+            setQteStatus(assignedGroup, "active");
             show("qteWaiting");
             return;
           }
