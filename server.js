@@ -522,12 +522,11 @@ app.post("/scan-hidden-qr", (req, res) => {
     return res.json({ success: false, message: "Not a hidden QR" });
   }
 
-  if (scannedHiddenQR[qr]?.includes(group)) {
-    return res.json({ success: false, message: "Already claimed by your group" });
+  if (scannedHiddenQR[qr]) {
+    return res.json({ success: false, message: "Already claimed" });
   }
 
-  if (!scannedHiddenQR[qr]) scannedHiddenQR[qr] = [];
-  scannedHiddenQR[qr].push(group);
+  scannedHiddenQR[qr] = true;
 
   const points = getPoints();
 
@@ -563,7 +562,7 @@ app.post("/scan-hidden-qr", (req, res) => {
     Object.keys(points).forEach(g => {
       if (g !== group) {
 
-        let stealAmount = Math.min(2, points[g]);
+        let stealAmount = 2;
 
         // 🛡️ shield blocks steal first
         if (shield[g] > 0) {

@@ -750,8 +750,7 @@ function onScanSuccess(decodedText) {
         .then(data => {
             alert(data.message);
 
-          updateDashboard();
-          show("playerHome");
+          openMemberScanner();
         });
 
       } else {
