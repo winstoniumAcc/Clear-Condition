@@ -1309,6 +1309,8 @@ async function syncQTE() {
   }
 }
 
+let currentQTEType = null;
+
 function updateQTEUI(data, data1) {
   const toastEl = document.getElementById("qteToast");
   const title = document.getElementById("qteTitle");
@@ -1339,7 +1341,6 @@ function updateQTEUI(data, data1) {
       timer.innerText = "Be the fastest group to earn more points!";
        document.querySelectorAll(".goBackDash").forEach(el => {el.style.display = "none";});
     } else {
-      qteActive = false;
       timer.innerText = data1.text;
     }
 
@@ -1401,6 +1402,7 @@ setInterval(async () => {
 
   if (data.active && !qteActive && isLeader()) {
     qteActive = true;
+    currentQTEType = qteTask?.type;
 
     if (qteTask?.type !== "notification") {
       if (document.getElementById("playerHome").classList.contains("active") || document.getElementById("wheelScreen").classList.contains("active")) {
@@ -1427,24 +1429,29 @@ setInterval(async () => {
     }
   }
 
-  if (!data.active && qteActive && isLeader() && qteTask?.type !== "notification") {
+  if (!data.active && qteActive && isLeader()) {
     qteActive = false;
+    if (currentQTEType !== "notification") {
+      showQTEEnded();
 
-    showQTEEnded();
-
-    // restore normal task
-    if (originalTask) {
-      if (originalTask !== "Dashboard") {
-        currentPath[currentTaskIndex] = originalTask;
+      // restore normal task
+      if (originalTask) {
+        if (originalTask !== "Dashboard") {
+          currentPath[currentTaskIndex] = originalTask;
+        }
+        currentStage = originalStage;
       }
-      currentStage = originalStage;
+
+      if (originalTask === "Dashboard" || originalTask === null) {
+        show("playerHome");
+      } else {
+        loadTask();
+      }
+    } else {
+       hideQTE();
     }
 
-    if (originalTask === "Dashboard" || originalTask === null) {
-      show("playerHome");
-    } else {
-       loadTask();
-    }
+    currentQTEType = null;
   }
 }, 1000);
 </script>
