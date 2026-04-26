@@ -1297,7 +1297,7 @@ async function syncQTE() {
     const res1 = await fetch("https://clear-condition.onrender.com/qte-task");
     const data1 = await res1.json();
 
-    updateQTEUI(data);
+    updateQTEUI(data, data1);
 
     // 🔥 AUTO ENTER QTE SCREEN IF ACTIVE
     if ((data.active || data.countdown > 0) && data1.type !== "notification") {
@@ -1396,7 +1396,7 @@ setInterval(async () => {
   const taskRes = await fetch("https://clear-condition.onrender.com/qte-task");
   const qteTask = await taskRes.json();
 
-  updateQTEUI(data);
+  updateQTEUI(data, qteTask);
 
   if (data.active && !qteActive && isLeader()) {
     qteActive = true;
