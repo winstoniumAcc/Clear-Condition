@@ -412,12 +412,14 @@ app.post("/start-qte", (req, res) => {
   qte.endsAt = null;
   qte.title = title || "Quick Time Event";
 
-  qteTask = task;
-  qteTask.qte = true;
+  if (task.type !== "notification") {
+    qteTask = task;
+    qteTask.qte = true;
 
-  Object.keys(qteStatus).forEach(g => {
-    qteStatus[g] = "inactive";
-  });
+    Object.keys(qteStatus).forEach(g => {
+      qteStatus[g] = "inactive";
+    });
+  }
 
   qteInterval = setInterval(() => {
     qte.countdown--;

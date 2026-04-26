@@ -526,8 +526,6 @@ function checkAnswer() {
   const task = currentPath[currentTaskIndex];
   let ans = document.getElementById("answer").value.toLowerCase().trim();
 
-  console.log(task.qte);
-
   if (ans === task.answer) {
     if (task.qte) {
       setQteStatus(assignedGroup, "active");
@@ -1299,7 +1297,7 @@ async function syncQTE() {
     updateQTEUI(data);
 
     // 🔥 AUTO ENTER QTE SCREEN IF ACTIVE
-    if (data.active || data.countdown > 0) {
+    if ((data.active || data.countdown > 0) && data.type !== "notification") {
       loadTask();
     }
 
@@ -1318,6 +1316,17 @@ function updateQTEUI(data) {
   lastQTEState = stateString;
 
   // 🔴 COUNTDOWN
+  if (data.type === "notification") {
+    toastEl.classList.remove("text-bg-primary", "text-bg-success");
+    toastEl.classList.add("text-bg-warning");
+
+    title.innerText = data.title || "Notification";
+    timer.innerText = data.text || "";
+
+    qteToast.show();
+    return; // 🚨 STOP HERE so it doesn't behave like QTE
+  }
+
   if (data.countdown > 0) {
     toastEl.classList.remove("text-bg-success", "text-bg-danger");
     toastEl.classList.add("text-bg-primary");
@@ -1418,9 +1427,7 @@ setInterval(async () => {
       const res1 = await fetch("https://clear-condition.onrender.com/qte-status?group=" + assignedGroup);
       const data1 = await res1.json();
 
-      console.log("gotten status:", data1.status);
-
-      if (data1.status === "active") {
+      if (data1.status !== "inactive") {
         show("qteWaiting");
       } else {
         loadTask(); // reuse SAME function
