@@ -738,7 +738,7 @@ function onScanSuccess(decodedText) {
     .then(() => {
 
       if (!leaders.includes(currentUser)) {
-
+            console.log("Scan member")
         fetch("https://clear-condition.onrender.com/scan-hidden-qr", {
           method: "POST",
           headers: {
@@ -760,23 +760,24 @@ function onScanSuccess(decodedText) {
           show("playerHome");
         });
 
-        return;
+      } else {
+            console.log("Scan normal")
+         if (decodedText === expectedQR) {
+
+        playTransition(() => {
+          completeScan();
+          nextTask(); // ✅ FIXED
+        });
+
+      } else {
+        alert("Wrong QR Code!");
+        loadTask();
       }
-
-      if (decodedText === expectedQR) {
-
-      playTransition(() => {
-        completeScan();
-        nextTask(); // ✅ FIXED
-      });
-
-    } else {
-      alert("Wrong QR Code!");
-      loadTask();
-    }
+      }
     })
     .finally(() => {
       setTimeout(() => {
+        console.log("Scan now false")
         scanning = false;
       }, 1000);
     });
@@ -874,8 +875,6 @@ function showPreview() {
 
   video.controls = true;
   video.muted = false; // allow playback sound
-  video.playsInline = true; 
-  video.load();
 
   video.play();
 }
