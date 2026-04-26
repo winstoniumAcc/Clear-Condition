@@ -530,6 +530,7 @@ function checkAnswer() {
     if (task.type === "qte") {
       setQteStatus(assignedGroup, "active");
       show("qteWaiting");
+      console.log("qte shown");
       return;
     }
 
@@ -1416,6 +1417,8 @@ setInterval(async () => {
 
       const res1 = await fetch("https://clear-condition.onrender.com/qte-status?group=" + assignedGroup);
       const data1 = await res1.json();
+
+      console.log("gotten status:", data1.status);
 
       if (data1.status === "active") {
         show("qteWaiting");
