@@ -20,6 +20,28 @@
 <input id="qteAnswer" class="form-control mb-2" placeholder="Answer (only for question)">
 <input id="qteReward" class="form-control mb-2" placeholder="Reward points">
 
+<div class="card-ui text-center mt-3">
+
+  <h4>⚙️ Admin Points Control</h4>
+
+  <select id="adminGroup" class="form-control mt-2">
+    <option>Group 1</option>
+    <option>Group 2</option>
+    <option>Group 3</option>
+    <option>Group 4</option>
+  </select>
+
+  <input id="adminAmount"
+         type="number"
+         class="form-control mt-2"
+         placeholder="Enter amount (+ or -)">
+
+  <button class="btn btn-primary w-100 mt-3" onclick="givePoints()">
+    Apply Points
+  </button>
+
+</div>
+
 <script>
 async function checkAdmin() {
   const pass = prompt("Enter admin password:");
@@ -45,6 +67,42 @@ async function checkAdmin() {
   }
 
   return true;
+}
+
+async function givePoints() {
+  const group = document.getElementById("adminGroup").value;
+  const amount = Number(document.getElementById("adminAmount").value);
+
+  if (!group || isNaN(amount)) {
+    alert("Invalid input");
+    return;
+  }
+
+  try {
+    const res = await fetch("https://clear-condition.onrender.com/add-points", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        group,
+        amount
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert(`${group} now has ${data.points} points`);
+    } else {
+      alert("Failed to update points");
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
 }
 
 async function load() {
