@@ -119,18 +119,18 @@ let qteStatus = {
 };
 
 const hiddenQRCodes = {
-  "HIDDEN1": { type: "Win"},
-  "HIDDEN2": { type: "Win"},
-  "HIDDEN3": { type: "Win"},
-  "HIDDEN4": { type: "Lose"},
-  "HIDDEN5": { type: "Lose"},
-  "HIDDEN6": { type: "Lose"},
-  "HIDDEN7": { type: "Steal"},
-  "HIDDEN8": { type: "Steal"},
-  "HIDDEN9": { type: "Steal"},
-  "HIDDEN10": { type: "Shield"},
-  "HIDDEN11": { type: "Shield"},
-  "HIDDEN12": { type: "Shield"}
+  "HIDDEN1": "Win",
+  "HIDDEN2": "Win",
+  "HIDDEN3": "Win",
+  "HIDDEN4": "Lose",
+  "HIDDEN5": "Lose",
+  "HIDDEN6": "Lose",
+  "HIDDEN7": "Steal",
+  "HIDDEN8": "Steal",
+  "HIDDEN9": "Steal",
+  "HIDDEN10": "Shield",
+  "HIDDEN11": "Shield",
+  "HIDDEN12": "Shield"
 };
 const scannedHiddenQR = [];
 
@@ -565,13 +565,22 @@ app.post("/scan-hidden-qr", (req, res) => {
 
     Object.keys(points).forEach(g => {
       if (g !== group) {
-        const stealAmount = Math.min(2, points[g]);
+
+        let stealAmount = Math.min(2, points[g]);
+
+        // 🛡️ shield blocks steal first
+        if (shield[g] > 0) {
+          shield[g]--;
+          stealAmount = 0; // blocked completely
+        }
+
         points[g] -= stealAmount;
         totalStolen += stealAmount;
       }
     });
 
     points[group] += totalStolen;
+
     message = `Stole ${totalStolen} points from all groups!`;
   }
 

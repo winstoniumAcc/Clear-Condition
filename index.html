@@ -737,7 +737,6 @@ function onScanSuccess(decodedText) {
     .then(() => html5QrCode.clear())
     .then(() => {
 
-        // 🔥 MEMBER MODE (non-leader)
       if (!leaders.includes(currentUser)) {
 
         fetch("https://clear-condition.onrender.com/scan-hidden-qr", {
@@ -752,19 +751,9 @@ function onScanSuccess(decodedText) {
         })
         .then(res => res.json())
         .then(data => {
+
            if (data.success) {
-              if (data.type === "Win") {
-                alert("Your group has gained 5 points.");
-              }
-              if (data.type === "Steal") {
-                alert("Your group has stolen 6 points from all groups.");
-              }
-              if (data.type === "Shield") {
-                alert("Your group has gained 1 shield.");
-              }
-              if (data.type === "Lose") {
-                alert("Your group has lost 5 points");
-              }
+              alert(data.message);
            }
 
           updateDashboard();
