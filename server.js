@@ -80,6 +80,13 @@ let groupProgress = {
   "4": { taskIndex: 0, stage: "task" }
 };
 
+let shield = {
+  "Group 1": 0,
+  "Group 2": 0,
+  "Group 3": 0,
+  "Group 4": 0
+};
+
 const session = require("express-session");
 
 app.use(session({
@@ -112,18 +119,18 @@ let qteStatus = {
 };
 
 const hiddenQRCodes = {
-  "HIDDEN1": { type: "Steal", value: 5 },
-  "HIDDEN2": { type: "Points", value: 5 },
-  "HIDDEN3": { type: "Trap", value: 5 },
-  "HIDDEN4": { type: "Double", value: 2 },
-  "HIDDEN5": { type: "Steal", value: 5 },
-  "HIDDEN6": { type: "Points", value: 5 },
-  "HIDDEN7": { type: "Trap", value: 5 },
-  "HIDDEN8": { type: "Double", value: 2 },
-  "HIDDEN9": { type: "Steal", value: 5 },
-  "HIDDEN10": { type: "Points", value: 5 },
-  "HIDDEN11": { type: "Trap", value: 5 },
-  "HIDDEN12": { type: "Double", value: 2 }
+  "HIDDEN1": { type: "Win"},
+  "HIDDEN2": { type: "Win"},
+  "HIDDEN3": { type: "Win"},
+  "HIDDEN4": { type: "Lose"},
+  "HIDDEN5": { type: "Lose"},
+  "HIDDEN6": { type: "Lose"},
+  "HIDDEN7": { type: "Steal"},
+  "HIDDEN8": { type: "Steal"},
+  "HIDDEN9": { type: "Steal"},
+  "HIDDEN10": { type: "Shield"},
+  "HIDDEN11": { type: "Shield"},
+  "HIDDEN12": { type: "Shield"}
 };
 const scannedHiddenQR = [];
 
@@ -511,42 +518,79 @@ app.post("/scan-hidden-qr", (req, res) => {
 
   const reward = hiddenQRCodes[qr];
 
-  // ❌ Not a hidden QR
   if (!reward) {
-    return res.json({
-      success: false,
-      message: "Not a hidden QR"
-    });
+    return res.json({ success: false, message: "Not a hidden QR" });
   }
 
-  // ❌ Already claimed globally
   if (scannedHiddenQR.includes(qr)) {
-    return res.json({
-      success: false,
-      message: "Already claimed by another team"
-    });
+    return res.json({ success: false, message: "Already claimed by another team" });
   }
 
-  // ✅ Mark as claimed
   scannedHiddenQR.push(qr);
+
+  const points = getPoints();
+
+  // 🔒 safety init
+  if (!points[group]) points[group] = 0;
+  if (!shield[group]) shield[group] = 0;
 
   let message = "";
 
-  // 🎁 POINTS
-  if (reward.type === "Points") {
-    message = `+${reward.value} points!`;
+  // =========================
+  // 🎁 WIN (+5 points)
+  // =========================
+  if (reward.type === "Win") {
+    points[group] += 5;
+    message = "Your group has gained 5 points!";
   }
 
-  // 🕵️ STEAL
-  if (reward.type === "Steal") {
-    message = `Steal ${reward.value} points from any group!`;
+  // =========================
+  // 💀 LOSE (-5 points, shield blocks)
+  // =========================
+  if (reward.type === "Lose") {
+    if (shield[group] > 0) {
+      shield[group]--;
+      message = "Blocked by shield! No points lost.";
+    } else {
+      points[group] -= 5;
+      message = "Your group has lost 5 points!";
+    }
   }
+
+  // =========================
+  // 🕵️ STEAL (2 points from each group)
+  // =========================
+  if (reward.type === "Steal") {
+    let totalStolen = 0;
+
+    Object.keys(points).forEach(g => {
+      if (g !== group) {
+        const stealAmount = Math.min(2, points[g]);
+        points[g] -= stealAmount;
+        totalStolen += stealAmount;
+      }
+    });
+
+    points[group] += totalStolen;
+    message = `Stole ${totalStolen} points from all groups!`;
+  }
+
+  // =========================
+  // 🛡️ SHIELD (+1 shield)
+  // =========================
+  if (reward.type === "Shield") {
+    shield[group] += 1;
+    message = "Your group gained 1 shield!";
+  }
+
+  savePoints(points);
 
   res.json({
     success: true,
     type: reward.type,
-    value: reward.value,
-    message
+    message,
+    shield: shield[group],
+    points: points[group]
   });
 });
 

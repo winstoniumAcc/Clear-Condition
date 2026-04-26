@@ -451,7 +451,7 @@ async function completeTask() {
     body: JSON.stringify({ group })
   });
 
-  addPoints(10);
+  addPoints(10, assignedGroup);
 }
 
 async function completeScan() {
@@ -752,11 +752,20 @@ function onScanSuccess(decodedText) {
         })
         .then(res => res.json())
         .then(data => {
-          alert(data.message);
-
-          if (data.success && data.type === "Points") {
-            addPoints(data.value);
-          }
+           if (data.success) {
+              if (data.type === "Win") {
+                alert("Your group has gained 5 points.");
+              }
+              if (data.type === "Steal") {
+                alert("Your group has stolen 6 points from all groups.");
+              }
+              if (data.type === "Shield") {
+                alert("Your group has gained 1 shield.");
+              }
+              if (data.type === "Lose") {
+                alert("Your group has lost 5 points");
+              }
+           }
 
           updateDashboard();
           show("playerHome");
@@ -1227,9 +1236,9 @@ function logout() {
   show("home");
 }
 
-async function addPoints(amount) {
+async function addPoints(amount, group) {
 
-  let group = "Group " + assignedGroup;
+  let group1 = "Group " + group;
 
   await fetch("/add-points", {
     method: "POST",
@@ -1237,7 +1246,7 @@ async function addPoints(amount) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      group: group,
+      group: group1,
       amount: amount
     })
   });
@@ -1488,6 +1497,7 @@ setInterval(async () => {
       }
 
       if (originalTask === "Dashboard" || originalTask === null) {
+        updateDashboard();
         show("playerHome");
       } else {
         loadTask();
