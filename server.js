@@ -75,7 +75,7 @@ const paths = {
     {
       type: "memory",
       title: "Task 7",
-      text: "https://cdn.acidcow.com/pics/20100629/most_popular_imgur_images_45.jpg",
+      text: "",
       nextLocationHint: "",
       nextQR: "4CLUE7"
     },
@@ -103,12 +103,11 @@ const paths = {
       nextQR: "START"
     },
     {
-      type: "question",
+      type: "memory",
       title: "Task 1",
-      text: "I have keys but no locks. What am I?",
-      answer: "piano",
-      nextLocationHint: "I have a lot of books.",
-      nextQR: "CLUE2"
+      text: "",
+      nextLocationHint: "",
+      nextQR: "3CLUE1"
     },
     {
       type: "video",
