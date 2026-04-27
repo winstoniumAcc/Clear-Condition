@@ -34,28 +34,67 @@ const paths = {
       text: "Apa angka berikutnya: 5, 11, 23, 47, ?",
       answer: "95",
       nextLocationHint: "",
-      nextQR: "1CLUE1"
+      nextQR: "4CLUE1"
     },
     {
       type: "video",
       title: "Task 2",
       text: "Lari memutari lapangan gor bawah 3x (2 anggota bersamaan)",
       nextLocationHint: "",
-      nextQR: "1CLUE2"
+      nextQR: "4CLUE2"
     },
     {
       type: "photo",
       title: "Task 3",
       text: "Foto 1 buku fisika, 1 buku mandarin, 1 buku inggris (1 anggota memegang 1 buku)",
       nextLocationHint: "",
-      nextQR: "1CLUE3"
+      nextQR: "4CLUE3"
     },
      {
       type: "puzzle",
       title: "Task 4",
       text: "https://cdn.acidcow.com/pics/20100629/most_popular_imgur_images_45.jpg",
       nextLocationHint: "",
-      nextQR: "1CLUE4"
+      nextQR: "4CLUE4"
+    },
+    {
+      type: "video",
+      title: "Task 5",
+      text: "Nyanyi lagu balon ku ada lima not nada dasar i",
+      nextLocationHint: "",
+      nextQR: "4CLUE5"
+    },
+    {
+      type: "question",
+      title: "Task 6",
+      text: "Aku tidak hidup, tapi aku tumbuh. Aku tidak punya paru-paru, tapi aku butuh udara. Apa aku?",
+      answer: "Api",
+      nextLocationHint: "",
+      nextQR: "4CLUE6"
+    },
+    {
+      type: "memory",
+      title: "Task 7",
+      text: "https://cdn.acidcow.com/pics/20100629/most_popular_imgur_images_45.jpg",
+      nextLocationHint: "",
+      nextQR: "4CLUE7"
+    },
+    {
+      type: "photo",
+      title: "Task 8",
+      text: "Recreate pose couple (1 anggota cowok, 1 anggota cewek)",
+      nextLocationHint: "",
+      nextQR: "4CLUE8"
+    },
+    {
+      type: "video",
+      title: "Task 9",
+      text: "Bikin yel-yel kelompok",
+      nextLocationHint: "",
+      nextQR: "4CLUE9"
+    },
+    {
+      
     }
   ],
    3: [
@@ -84,7 +123,7 @@ const paths = {
       text: "Take a picture of another group's leader",
       nextLocationHint: "Near canteen",
       nextQR: "CLUE2"
-    }
+    },
   ],
 };
 
