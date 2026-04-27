@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const bcrypt = require("bcrypt");
 
-// 🔥 ensure videos folder existss
+// 🔥 ensure videos folder existsss
 const videosDir = path.join(__dirname, "videos");
 
 if (!fs.existsSync(videosDir)) {
