@@ -23,7 +23,7 @@ app.use("/videos", express.static("videos"));
 app.use(express.static(path.join(__dirname)));
 
 const paths = {
-  3: [
+  1: [
     {
       nextLocationHint: "Di PPT",
       nextQR: "START"
@@ -34,68 +34,145 @@ const paths = {
       text: "Apa angka berikutnya: 5, 11, 23, 47, ?",
       answer: "95",
       nextLocationHint: "",
-      nextQR: "3CLUE1"
+      nextQR: "1CLUE1"
     },
     {
       type: "video",
       title: "Task 2",
       text: "Lari memutari lapangan gor bawah 3x (2 anggota bersamaan)",
       nextLocationHint: "",
-      nextQR: "3CLUE2"
+      nextQR: "1CLUE2"
     },
     {
       type: "photo",
       title: "Task 3",
-      text: "Foto 1 buku fisika, 1 buku mandarin, 1 buku inggris (1 anggota memegang 1 buku)",
+      text: "Foto 1 buku fisika, 1 buku geografi, 1 buku inggris (1 anggota memegang 1 buku)",
       nextLocationHint: "",
-      nextQR: "3CLUE3"
+      nextQR: "1CLUE3"
     },
      {
       type: "puzzle",
       title: "Task 4",
       text: "https://cdn.acidcow.com/pics/20100629/most_popular_imgur_images_45.jpg",
       nextLocationHint: "",
-      nextQR: "3CLUE4"
+      nextQR: "1CLUE4"
     },
     {
       type: "video",
       title: "Task 5",
       text: "Nyanyi lagu balon ku ada lima not nada dasar i",
       nextLocationHint: "",
-      nextQR: "3CLUE5"
+      nextQR: "1CLUE5"
     },
     {
       type: "question",
       title: "Task 6",
       text: "Aku tidak hidup, tapi aku tumbuh. Aku tidak punya paru-paru, tapi aku butuh udara. Apa aku?",
-      answer: "api",
+      answer: "Api",
       nextLocationHint: "",
-      nextQR: "3CLUE6"
+      nextQR: "1CLUE6"
     },
     {
-      type: "memory",
+      type: "video",
       title: "Task 7",
-      text: "",
+      text: "Di gor bawah, setiap anggota tendang bola masuk ke gawang menggunakan kaki tidak dominan dari garis 3 point.",
       nextLocationHint: "",
-      nextQR: "3CLUE7"
+      nextQR: "1CLUE7"
     },
     {
       type: "photo",
       title: "Task 8",
-      text: "Recreate pose couple (1 anggota cowok, 1 anggota cewek)",
+      text: "Recreate pose couple",
       nextLocationHint: "",
-      nextQR: "3CLUE8"
+      nextQR: "1CLUE8"
     },
     {
       type: "video",
       title: "Task 9",
       text: "Bikin yel-yel kelompok",
       nextLocationHint: "",
-      nextQR: "3CLUE9"
+      nextQR: "1CLUE9"
     },
     {
-      
-    }
+      type: "video",
+      title: "Task 10",
+      text: "Hafalkan semua nama panjang anggota kelompok (1 anggota yg direkam)",
+      nextLocationHint: "",
+      nextQR: "1CLUE10"
+    },
+    {
+      type: "video",
+      title: "Task 11",
+      text: "Lakukan wall sit selama 30 detik (2 anggota)",
+      nextLocationHint: "",
+      nextQR: "1CLUE11"
+    },
+     {
+      type: "question",
+      title: "Task 12",
+      text: "Berapakah hasil dari (17 + 11) x 7?",
+      answer: "196",
+      nextLocationHint: "",
+      nextQR: "1CLUE12"
+    },
+    {
+      type: "puzzle",
+      title: "Task 13",
+      text: "https://th.bing.com/th/id/OIP.0FtyAfJpLY16nceqI3gV0QHaE-?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+      nextLocationHint: "",
+      nextQR: "1CLUE13"
+    },
+     {
+      type: "question",
+      title: "Task 14",
+      text: "Ia selalu di depanmu tapi tak bisa kau lihat?",
+      answer: "Masa Depan",
+      nextLocationHint: "",
+      nextQR: "1CLUE14"
+    },
+    {
+      type: "photo",
+      title: "Task 15",
+      text: "Foto 3 benda yang berwarna kuning (Dikumpulkan bendanya kemudian di foto)",
+      nextLocationHint: "",
+      nextQR: "1CLUE15"
+    },
+      {
+      type: "video",
+      title: "Task 16",
+      text: "Lakukan push up 5x bergantian (semua anggota)",
+      nextLocationHint: "",
+      nextQR: "1CLUE16"
+    },
+     {
+      type: "photo",
+      title: "Task 17",
+      text: "Recreate a meme",
+      nextLocationHint: "",
+      nextQR: "1CLUE17"
+    },
+     {
+      type: "question",
+      title: "Task 18",
+      text: "Apa yang punya banyak gigi tapi tak bisa makan/menggigit?",
+      answer: "Sisir",
+      nextLocationHint: "",
+      nextQR: "1CLUE18"
+    },
+    {
+      type: "photo",
+      title: "Task 19",
+      text: "Foto bersama guru / foto guru dari jauh (tidak mengganggu)",
+      nextLocationHint: "",
+      nextQR: "1CLUE19"
+    },
+    {
+      type: "puzzle",
+      title: "Task 20",
+      text: "https://tse2.mm.bing.net/th/id/OIP.GOMXjlgEwY78ICmuAftsFQHaF3?rs=1&pid=ImgDetMain&o=7&rm=3",
+      nextLocationHint: "Task sudah habis",
+      nextQR: " "
+    },
   ],
    2: [
     {
@@ -117,15 +194,283 @@ const paths = {
       nextLocationHint: "",
       nextQR: "2CLUE2"
     },
-    {
-      type: "video",
-      title: "Task 2",
-      text: "Lakukan jumping jacks 25x (sambil berhitung)",
+     {
+      type: "photo",
+      title: "Task 3",
+      text: "Foto bersama guru / foto guru dari jauh (tidak mengganggu)",
       nextLocationHint: "",
       nextQR: "2CLUE3"
     },
-
+    {
+      type: "video",
+      title: "Task 4",
+      text: "Lakukan jumping jacks 25x (Semua anggota melakukan sambil berhitung)",
+      nextLocationHint: "",
+      nextQR: "2CLUE4"
+    },
+     {
+      type: "photo",
+      title: "Task 5",
+      text: "Pegang 10 buku dalam 1 tangan",
+      nextLocationHint: "",
+      nextQR: "2CLUE5"
+    },
+    {
+      type: "video",
+      title: "Task 6",
+      text: "Di gor bawah, setiap anggota tendang bola masuk ke gawang menggunakan kaki tidak dominan dari garis 3 point.",
+      nextLocationHint: "",
+      nextQR: "2CLUE6"
+    },
+    {
+      type: "video",
+      title: "Task 7",
+      text: "Bikin yel-yel kelompok",
+      nextLocationHint: "",
+      nextQR: "2CLUE7"
+    },
+    {
+      type: "question",
+      title: "Task 8",
+      text: "Berapakah hasil dari (17 + 11) x 7?",
+      answer: "196",
+      nextLocationHint: "",
+      nextQR: "2CLUE8"
+    },
+     {
+      type: "puzzle",
+      title: "Task 9",
+      text: "https://th.bing.com/th/id/OIP.0FtyAfJpLY16nceqI3gV0QHaE-?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+      nextLocationHint: "",
+      nextQR: "2CLUE9"
+    },
+     {
+      type: "video",
+      title: "Task 10",
+      text: "Lakukan wall sit selama 30 detik (2 anggota)",
+      nextLocationHint: "",
+      nextQR: "2CLUE10"
+    },
+     {
+      type: "question",
+      title: "Task 11",
+      text: "Apa angka berikutnya: 5, 11, 23, 47, ?",
+      answer: "95",
+      nextLocationHint: "",
+      nextQR: "2CLUE11"
+    },
+       {
+      type: "photo",
+      title: "Task 12",
+      text: "Recreate pose couple",
+      nextLocationHint: "",
+      nextQR: "2CLUE12"
+    },
+      {
+      type: "video",
+      title: "Task 13",
+      text: "Hafalkan semua nama panjang anggota kelompok (1 anggota yg direkam)",
+      nextLocationHint: "",
+      nextQR: "2CLUE13"
+    },
+    {
+      type: "video",
+      title: "Task 14",
+      text: "Lari memutari lapangan gor bawah 3x (2 anggota bersamaan)",
+      nextLocationHint: "",
+      nextQR: "2CLUE14"
+    },
+    {
+      type: "puzzle",
+      title: "Task 15",
+      text: "https://tse2.mm.bing.net/th/id/OIP.GOMXjlgEwY78ICmuAftsFQHaF3?rs=1&pid=ImgDetMain&o=7&rm=3",
+      nextLocationHint: "",
+      nextQR: "2CLUE15"
+    },
+    {
+      type: "question",
+      title: "Task 16",
+      text: "Aku tidak hidup, tapi aku tumbuh. Aku tidak punya paru-paru, tapi aku butuh udara. Apa aku?",
+      answer: "Api",
+      nextLocationHint: "",
+      nextQR: "2CLUE16"
+    },
+     {
+      type: "photo",
+      title: "Task 17",
+      text: "Foto 3 benda yang berwarna kuning (Dikumpulkan bendanya kemudian di foto)",
+      nextLocationHint: "",
+      nextQR: "2CLUE17"
+    },
+      {
+      type: "photo",
+      title: "Task 18",
+      text: "Recreate a meme",
+      nextLocationHint: "",
+      nextQR: "2CLUE18"
+    },
+     {
+      type: "photo",
+      title: "Task 19",
+      text: "Foto 1 buku sejarah, 1 buku inggris, 1 buku ekonomi (1 anggota memegang 1 buku)",
+      nextLocationHint: "",
+      nextQR: "2CLUE19"
+    },
+        {
+      type: "question",
+      title: "Task 20",
+      text: "Apa yang punya banyak gigi tapi tak bisa makan/menggigit?",
+      answer: "Sisir",
+      nextLocationHint: "Task sudah habis",
+      nextQR: " "
+    },
   ],
+  3: [
+     {
+      type: "photo",
+      title: "Task 1",
+      text: "Foto 1 buku sejarah, 1 buku inggris, 1 buku ekonomi (1 anggota memegang 1 buku)",
+      nextLocationHint: "",
+      nextQR: "3CLUE1"
+    },
+    {
+      type: "puzzle",
+      title: "Task 2",
+      text: "https://th.bing.com/th/id/OIP.0FtyAfJpLY16nceqI3gV0QHaE-?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
+      nextLocationHint: "",
+      nextQR: "3CLUE2"
+    },
+    {
+      type: "video",
+      title: "Task 3",
+      text: "Lakukan push up 5x bergantian (semua anggota)",
+      nextLocationHint: "",
+      nextQR: "3CLUE3"
+    },
+    {
+      type: "question",
+      title: "Task 4",
+      text: "Berapakah hasil dari (17 + 11) x 7?",
+      answer: "196",
+      nextLocationHint: "",
+      nextQR: "3CLUE4"
+    },
+    {
+      type: "question",
+      title: "Task 5",
+      text: "Apa yang punya banyak gigi tapi tak bisa makan/menggigit?",
+      answer: "Sisir",
+      nextLocationHint: "",
+      nextQR: "3CLUE5"
+    },
+    {
+      type: "photo",
+      title: "Task 6",
+      text: "Foto 3 benda yang berwarna kuning (Dikumpulkan bendanya kemudian di foto)",
+      nextLocationHint: "",
+      nextQR: "3CLUE6"
+    },
+    {
+      type: "video",
+      title: "Task 7",
+      text: "Lari memutari lapangan gor bawah 3x (2 anggota bersamaan)",
+      nextLocationHint: "",
+      nextQR: "3CLUE7"
+    },
+    {
+      type: "video",
+      title: "Task 8",
+      text: "Nyanyi lagu balon ku ada lima not nada dasar u",
+      nextLocationHint: "",
+      nextQR: "3CLUE8"
+    },
+      {
+      type: "photo",
+      title: "Task 9",
+      text: "Recreate a meme",
+      nextLocationHint: "",
+      nextQR: "3CLUE9"
+    },
+      {
+      type: "video",
+      title: "Task 10",
+      text: "Lakukan wall sit selama 30 detik (2 anggota)",
+      nextLocationHint: "",
+      nextQR: "3CLUE10"
+    },
+    {
+      type: "photo",
+      title: "Task 11",
+      text: "Foto bersama guru / foto guru dari jauh (tidak mengganggu)",
+      nextLocationHint: "",
+      nextQR: "3CLUE11"
+    },
+    {
+      type: "question",
+      title: "Task 12",
+      text: "Ia selalu di depanmu tapi tak bisa kau lihat?",
+      answer: "masa depan",
+      nextLocationHint: "",
+      nextQR: "3CLUE12"
+    },
+    {
+      type: "photo",
+      title: "Task 13",
+      text: "Recreate pose couple (tanpa harus couple beneran)",
+      nextLocationHint: "",
+      nextQR: "3CLUE13"
+    },
+    {
+      type: "video",
+      title: "Task 14",
+      text: "Hafalkan semua nama panjang anggota kelompok (1 anggota yg direkam)",
+      nextLocationHint: "",
+      nextQR: "3CLUE14"
+    },
+    {
+      type: "photo",
+      title: "Task 15",
+      text: "Group photo dengan pose kreatif (bebas gaya)",
+      nextLocationHint: "",
+      nextQR: "3CLUE15"
+    },
+    {
+      type: "question",
+      title: "Task 16",
+      text: "Apa angka berikutnya: 5, 11, 23, 47, ?",
+      answer: "95",
+      nextLocationHint: "",
+      nextQR: "3CLUE16"
+    },
+    {
+      type: "video",
+      title: "Task 17",
+      text: "Bikin yel-yel kelompok",
+      nextLocationHint: "",
+      nextQR: "3CLUE17"
+    },
+    {
+      type: "photo",
+      title: "Task 18",
+      text: "Foto 1 buku fisika, 1 buku geografi, 1 buku inggris (1 anggota memegang 1 buku)",
+      nextLocationHint: "",
+      nextQR: "3CLUE18"
+    },
+    {
+      type: "video",
+      title: "Task 19",
+      text: "Tendang bola ke gawang dengan kaki tidak dominan dari jarak jauh",
+      nextLocationHint: "",
+      nextQR: "3CLUE19"
+    },
+    {
+      type: "puzzle",
+      title: "Task 20",
+      text: "https://cdn.acidcow.com/pics/20100629/most_popular_imgur_images_45.jpg",
+      nextLocationHint: "Task sudah habis",
+      nextQR: ""
+    }
+  ]
 };
 
 let groupProgress = {
