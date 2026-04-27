@@ -313,7 +313,7 @@
       margin-top: 15px;
     "></div>
 
-    <button class="btn btn-outline-light w-100 mt-3 goBackDash" onclick="goDashboard()">Back</button>
+    <button class="btn btn-outline-light w-100 mt-3 goBackDash" onclick="goDashboard()">Back to Dashboard</button>
   </div>
 </div>
 
@@ -576,8 +576,9 @@ async function startGame() {
 function checkAnswer() {
   const task = currentPath[currentTaskIndex];
   let ans = document.getElementById("answer").value.toLowerCase().trim();
+  let correct = task.answer.toLowerCase().trim();
 
-  if (ans === task.answer) {
+  if (ans === correct) {
     if (task.qte) {
       setQteStatus(assignedGroup, "active");
       show("qteWaiting");
