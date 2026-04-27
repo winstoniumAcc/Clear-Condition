@@ -23,7 +23,7 @@ app.use("/videos", express.static("videos"));
 app.use(express.static(path.join(__dirname)));
 
 const paths = {
-  4: [
+  3: [
     {
       nextLocationHint: "Di PPT",
       nextQR: "START"
@@ -34,110 +34,110 @@ const paths = {
       text: "Apa angka berikutnya: 5, 11, 23, 47, ?",
       answer: "95",
       nextLocationHint: "",
-      nextQR: "4CLUE1"
+      nextQR: "3CLUE1"
     },
     {
       type: "video",
       title: "Task 2",
       text: "Lari memutari lapangan gor bawah 3x (2 anggota bersamaan)",
       nextLocationHint: "",
-      nextQR: "4CLUE2"
+      nextQR: "3CLUE2"
     },
     {
       type: "photo",
       title: "Task 3",
       text: "Foto 1 buku fisika, 1 buku mandarin, 1 buku inggris (1 anggota memegang 1 buku)",
       nextLocationHint: "",
-      nextQR: "4CLUE3"
+      nextQR: "3CLUE3"
     },
      {
       type: "puzzle",
       title: "Task 4",
       text: "https://cdn.acidcow.com/pics/20100629/most_popular_imgur_images_45.jpg",
       nextLocationHint: "",
-      nextQR: "4CLUE4"
+      nextQR: "3CLUE4"
     },
     {
       type: "video",
       title: "Task 5",
       text: "Nyanyi lagu balon ku ada lima not nada dasar i",
       nextLocationHint: "",
-      nextQR: "4CLUE5"
+      nextQR: "3CLUE5"
     },
     {
       type: "question",
       title: "Task 6",
       text: "Aku tidak hidup, tapi aku tumbuh. Aku tidak punya paru-paru, tapi aku butuh udara. Apa aku?",
-      answer: "Api",
+      answer: "api",
       nextLocationHint: "",
-      nextQR: "4CLUE6"
+      nextQR: "3CLUE6"
     },
     {
       type: "memory",
       title: "Task 7",
       text: "",
       nextLocationHint: "",
-      nextQR: "4CLUE7"
+      nextQR: "3CLUE7"
     },
     {
       type: "photo",
       title: "Task 8",
       text: "Recreate pose couple (1 anggota cowok, 1 anggota cewek)",
       nextLocationHint: "",
-      nextQR: "4CLUE8"
+      nextQR: "3CLUE8"
     },
     {
       type: "video",
       title: "Task 9",
       text: "Bikin yel-yel kelompok",
       nextLocationHint: "",
-      nextQR: "4CLUE9"
+      nextQR: "3CLUE9"
     },
     {
       
     }
   ],
-   3: [
+   2: [
     {
       nextLocationHint: "Di PPT",
       nextQR: "START"
     },
     {
-      type: "memory",
+      type: "puzzle",
       title: "Task 1",
-      text: "",
+      text: "https://cdn.acidcow.com/pics/20100629/most_popular_imgur_images_45.jpg",
       nextLocationHint: "",
-      nextQR: "3CLUE1"
+      nextQR: "2CLUE1"
+    },
+    {
+      type: "question",
+      title: "Task 2",
+      text: "Ia selalu di depanmu tapi tak bisa kau lihat?",
+      answer: "Masa Depan",
+      nextLocationHint: "",
+      nextQR: "2CLUE2"
     },
     {
       type: "video",
       title: "Task 2",
-      text: "Record yourself running around the field",
-      nextLocationHint: "Near the basketball court stairs",
-      nextQR: "CLUE2"
+      text: "Lakukan jumping jacks 25x (sambil berhitung)",
+      nextLocationHint: "",
+      nextQR: "2CLUE3"
     },
-    {
-      type: "photo",
-      title: "Task 3",
-      text: "Take a picture of another group's leader",
-      nextLocationHint: "Near canteen",
-      nextQR: "CLUE2"
-    },
+
   ],
 };
 
 let groupProgress = {
   "1": { taskIndex: 0, stage: "scanner" },
   "2": { taskIndex: 0, stage: "scanner" },
-  "3": { taskIndex: 0, stage: "scanner" },
-  "4": { taskIndex: 0, stage: "scanner" }
+  "3": { taskIndex: 0, stage: "scanner" }
 };
 
 let shield = {
   "Group 1": 0,
   "Group 2": 0,
   "Group 3": 0,
-  "Group 4": 0
 };
 
 const session = require("express-session");
