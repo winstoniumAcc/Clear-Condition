@@ -63,7 +63,7 @@ const paths = {
       title: "Task 5",
       text: "Apa yang punya banyak gigi tapi tak bisa makan/menggigit?",
       answer: "Sisir",
-      nextLocationHint: "Depan tangga",
+      nextLocationHint: "Depan tangga lt 1",
       nextQR: "1CLUE5"
     },
     {
